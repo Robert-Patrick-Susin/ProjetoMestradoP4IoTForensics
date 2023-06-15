@@ -34,9 +34,22 @@ def handle_pkt(pkt):
     if iotprotocol in pkt:
         # tempo_atual = time.time()
         count = count + 1
-        nopre_total_pkt = open("nopre_total_pkt.txt","w")
-        nopre_total_pkt.write(str(count))
-        nopre_total_pkt.write("\n")
+        if (count == 50):
+            nopre_total_pkt = open("nopre_total_pkt.txt","a")
+            nopre_total_pkt.write(str(count))
+            nopre_total_pkt.write("\n")
+        elif (count == 100):
+            nopre_total_pkt = open("nopre_total_pkt.txt","a")
+            nopre_total_pkt.write(str(count))
+            nopre_total_pkt.write("\n")
+        elif (count == 200):            
+            nopre_total_pkt = open("nopre_total_pkt.txt","a")
+            nopre_total_pkt.write(str(count))
+            nopre_total_pkt.write("\n")
+        elif (count == 300):
+            nopre_total_pkt = open("nopre_total_pkt.txt","a")
+            nopre_total_pkt.write(str(count))
+            nopre_total_pkt.write("\n")
         # list_tempos.append(tempo_atual - ultimo_tempo)
         # ultimo_tempo = tempo_atual
         # if (count > 1):

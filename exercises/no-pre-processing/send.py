@@ -47,7 +47,7 @@ def main():
     # for x in range(0, 9):
     #     global x
     #     x = x + 1
-    sendp(pkt, iface=iface, verbose=False, inter=1, count=10)
+    sendp(pkt, iface=iface, verbose=False, inter=1, count=1000)
     
     
 
