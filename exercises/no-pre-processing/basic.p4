@@ -155,7 +155,7 @@ control MyEgress(inout headers hdr,
         }
 
     apply {
-        /*Se o pacote for clonado, manda para Blockchain*/
+        /*Se o pacote for clonado, manda para o Plano de Controle*/
         if (standard_metadata.instance_type == 1) {
             ipv4_lpm_gambia.apply();
         }

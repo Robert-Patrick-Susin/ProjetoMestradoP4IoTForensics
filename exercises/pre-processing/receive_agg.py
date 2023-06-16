@@ -32,21 +32,24 @@ def handle_pkt(pkt):
     global count
     global list_tempos
     global ultimo_tempo
+    if iotprotocol in pkt:
+        pkt.show2()
     if iot_agregacao in pkt:
-        tempo_atual = time.time()
+        pkt.show2()
         count = count + 1
-        list_tempos.append(tempo_atual - ultimo_tempo)
-        ultimo_tempo = tempo_atual
-        if (count > 1):
-            median = (statistics.median(list_tempos[1:]))
-            # Abre o arquivo med_tx_receb_pkt.txt e escreve a media 
-            # da taxa de recebimento de count pacotes
-            med_tx_receb_pkt = open("med_tx_receb_pkt.txt","a")
-            med_tx_receb_pkt.write(str(median))
-            med_tx_receb_pkt.write("\n")
+        # tempo_atual = time.time()
+        # list_tempos.append(tempo_atual - ultimo_tempo)
+        # ultimo_tempo = tempo_atual
+        # if (count > 1):
+        #     median = (statistics.median(list_tempos[1:]))
+        #     # Abre o arquivo med_tx_receb_pkt.txt e escreve a media 
+        #     # da taxa de recebimento de count pacotes
+        #     med_tx_receb_pkt = open("med_tx_receb_pkt.txt","a")
+        #     med_tx_receb_pkt.write(str(median))
+        #     med_tx_receb_pkt.write("\n")
         
 
-    pkt.show2()
+  
     sys.stdout.flush()
 
         # Criar lista iot_agregado que sera enviado a BC, dar append nos campos

@@ -32,24 +32,25 @@ def handle_pkt(pkt):
     # global list_tempos
     # global ultimo_tempo
     if iotprotocol in pkt:
+        pkt.show2()
         # tempo_atual = time.time()
         count = count + 1
-        if (count == 50):
+        if (count == 500):
             nopre_total_pkt = open("nopre_total_pkt.txt","a")
             nopre_total_pkt.write(str(count))
             nopre_total_pkt.write("\n")
-        elif (count == 100):
-            nopre_total_pkt = open("nopre_total_pkt.txt","a")
-            nopre_total_pkt.write(str(count))
-            nopre_total_pkt.write("\n")
-        elif (count == 200):            
-            nopre_total_pkt = open("nopre_total_pkt.txt","a")
-            nopre_total_pkt.write(str(count))
-            nopre_total_pkt.write("\n")
-        elif (count == 300):
-            nopre_total_pkt = open("nopre_total_pkt.txt","a")
-            nopre_total_pkt.write(str(count))
-            nopre_total_pkt.write("\n")
+        # elif (count == 100):
+        #     nopre_total_pkt = open("nopre_total_pkt.txt","a")
+        #     nopre_total_pkt.write(str(count))
+        #     nopre_total_pkt.write("\n")
+        # elif (count == 200):            
+        #     nopre_total_pkt = open("nopre_total_pkt.txt","a")
+        #     nopre_total_pkt.write(str(count))
+        #     nopre_total_pkt.write("\n")
+        # elif (count == 300):
+        #     nopre_total_pkt = open("nopre_total_pkt.txt","a")
+        #     nopre_total_pkt.write(str(count))
+        #     nopre_total_pkt.write("\n")
         # list_tempos.append(tempo_atual - ultimo_tempo)
         # ultimo_tempo = tempo_atual
         # if (count > 1):
@@ -61,7 +62,7 @@ def handle_pkt(pkt):
         #     med_tx_receb_pkt.write("\n")
         
 
-    pkt.show2()
+   
     sys.stdout.flush()
 
         # Criar lista iot_agregado que sera enviado a BC, dar append nos campos

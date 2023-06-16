@@ -19,8 +19,8 @@ with open('nopre_total_pkt.txt', 'r') as datafile:
     for ROWS in plotting:
         Y.append(int(ROWS[0]))
 
-plt.plot(X, Y, label='Sem pré-processamento')
-plt.scatter(X, Y, label='Sem pré-processamento')
+plt.plot(X, Y, label='Sem agregação')
+plt.scatter(X, Y)
 plt.legend()
 plt.grid(True)
 plt.xlabel('Número dispositivos IoT')

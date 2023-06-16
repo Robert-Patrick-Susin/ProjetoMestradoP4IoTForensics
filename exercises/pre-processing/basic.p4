@@ -182,7 +182,7 @@ control MyIngress(inout headers hdr,
     apply {
         if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_RECIRC) {
             escreve_banco_em_iot_agg();
-            standard_metadata.egress_spec = 5;
+            standard_metadata.egress_spec = 42;
             /*Se meta.iterador == 'valor da primeira iteração' next_hdr = 0; Senão meta.iterador == 1*/
             if (meta.iterador == 1) {
                 hdr.iot_agregacao[0].next_hdr = 0;
