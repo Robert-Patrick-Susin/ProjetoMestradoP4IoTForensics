@@ -1,8 +1,8 @@
 #Tentativa de automatizar envio de pacotes a múltiplos hosts de uma vez
 #!/usr/bin/env python3
 import pexpect
-# import argparse
-# import subprocess
+import argparse
+import subprocess
 import os
 import sys
 
