@@ -20,9 +20,13 @@ class MininetAuto:
     def run_dispositivos_iot(self):
         self.proc.expect("mininet> ", timeout=None)
         self.proc.sendline(f"h1 python3 send.py 10.0.41.41 teste &")
+        self.proc.expect("mininet> ", timeout=None)
         self.proc.sendline(f"h2 python3 send.py 10.0.41.41 teste &")
+        self.proc.expect("mininet> ", timeout=None)
         self.proc.sendline(f"h3 python3 send.py 10.0.41.41 teste &")
+        self.proc.expect("mininet> ", timeout=None)
         self.proc.sendline(f"h4 python3 send.py 10.0.41.41 teste &")
+        self.proc.expect("mininet> ", timeout=None)
         self.proc.sendline(f"h5 python3 send.py 10.0.41.41 teste &")
 
         # self.proc.sendline(f"h"+str(id)+" python3 application.py "+str(id)+" &")

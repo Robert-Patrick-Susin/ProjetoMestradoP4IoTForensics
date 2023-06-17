@@ -10,7 +10,8 @@ from scapy.all import TCP, get_if_list, sniff
 ultimo_tempo = time.time()
 
 # Começo do experimento. Quando inicia o receptor
-count = 0  
+count = 0
+tamanho_total = 0
 # list_tempos = []
 
 
@@ -29,12 +30,17 @@ def get_if():
 # evento de recepção de pacote 
 def handle_pkt(pkt):
     global count
+    global tamanho_total
     # global list_tempos
     # global ultimo_tempo
     if iotprotocol in pkt:
         pkt.show2()
         # tempo_atual = time.time()
         count = count + 1
+        tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        tamanho_total_pkt = open("tamanho_total_pkt.txt","w")
+        tamanho_total_pkt.write(str(tamanho_total))
+        tamanho_total_pkt.write("\n")
         if (count == 500):
             nopre_total_pkt = open("nopre_total_pkt.txt","a")
             nopre_total_pkt.write(str(count))
