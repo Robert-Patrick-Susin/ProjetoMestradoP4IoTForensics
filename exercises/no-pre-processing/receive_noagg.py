@@ -38,13 +38,14 @@ def handle_pkt(pkt):
         # tempo_atual = time.time()
         count = count + 1
         tamanho_total = tamanho_total + sys.getsizeof(pkt)
-        tamanho_total_pkt = open("tamanho_total_pkt.txt","w")
+        tamanho_total_pkt = open("1-nopre_tamanho_total_pkt.txt","w")
         tamanho_total_pkt.write(str(tamanho_total))
         tamanho_total_pkt.write("\n")
-        if (count == 500):
-            nopre_total_pkt = open("nopre_total_pkt.txt","a")
-            nopre_total_pkt.write(str(count))
-            nopre_total_pkt.write("\n")
+        nopre_total_pkt = open("1-nopre_total_pkt.txt","a")
+        nopre_total_pkt.write(str(count))
+        nopre_total_pkt.write("\n")
+        # if (count == 1200):
+            
         # elif (count == 100):
         #     nopre_total_pkt = open("nopre_total_pkt.txt","a")
         #     nopre_total_pkt.write(str(count))

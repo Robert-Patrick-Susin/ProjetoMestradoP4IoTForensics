@@ -6,18 +6,53 @@ import csv
 X = []
 Y = []
 
-# Linha com agregação
-with open('nopre_dispositivos_iot.txt', 'r') as datafile:
+# 1 Linha - Baseline (Workload (a) 1 pacotes por segundo)
+# X nr de dispositivos
+with open('dispositivos_iot.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
 
     for ROWS in plotting:
         X.append(int(ROWS[0]))
-
-with open('nopre_total_pkt.txt', 'r') as datafile:
+# Y nr total pkt        
+with open('1-nopre_total_pkt.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
         Y.append(int(ROWS[0]))
+
+
+
+# 2 Linha - Baseline (Workload (b) 2 pacotes por segundo)
+# X nr de dispositivos        
+with open('dispositivos_iot.txt', 'r') as datafile:
+    plotting = csv.reader(datafile)
+
+    for ROWS in plotting:
+        X.append(int(ROWS[0]))
+# Y nr total pkt        
+with open('2-nopre_total_pkt.txt', 'r') as datafile:
+    plotting = csv.reader(datafile)
+     
+    for ROWS in plotting:
+        Y.append(int(ROWS[0]))
+
+
+
+# 3 Linha - Baseline (Workload (b) 3 pacotes por segundo)
+# X nr de dispositivos        
+with open('dispositivos_iot.txt', 'r') as datafile:
+    plotting = csv.reader(datafile)
+
+    for ROWS in plotting:
+        X.append(int(ROWS[0]))
+# Y nr total pkt        
+with open('3-nopre_total_pkt.txt', 'r') as datafile:
+    plotting = csv.reader(datafile)
+     
+    for ROWS in plotting:
+        Y.append(int(ROWS[0]))
+
+        
 
 plt.plot(X, Y, label='Sem agregação')
 plt.scatter(X, Y)

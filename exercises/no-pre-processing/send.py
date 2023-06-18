@@ -49,11 +49,11 @@ def main():
     #     global x
     #     x = x + 1
 
-#Enviar pacotes por somente 20 segundos
-    tempo_max = int(20)
-    tempo_inicial = time.time()
-    while (time.time() - tempo_inicial) < tempo_max:
-        sendp(pkt, iface=iface, verbose=False, inter=1)
+#Enviar pacotes por somente 30 segundos
+    # tempo_max = int(30)
+    # tempo_inicial = time.time()
+    # while (time.time() - tempo_inicial) < tempo_max:
+    sendp(pkt, iface=iface, verbose=False, count=100)
     
 
 
