@@ -7,8 +7,6 @@ import time
 from myIoT_header import iotprotocol
 from scapy.all import IP, TCP, Ether, get_if_hwaddr, get_if_list, sendp
 
-# x = 0
-
 def get_if():
     ifs=get_if_list()
     iface=None # "h1-eth0"
@@ -49,11 +47,13 @@ def main():
     #     global x
     #     x = x + 1
 
-#Enviar pacotes por somente 30 segundos
-    # tempo_max = int(30)
-    # tempo_inicial = time.time()
-    # while (time.time() - tempo_inicial) < tempo_max:
-    sendp(pkt, iface=iface, verbose=False, count=100)
+#Enviar pacotes por somente 20 segundos
+#inter = 0.462 (Aprox 2 pkt por seg)
+#inter = 0.2884 (Aprox 3 pkt por seg)
+    tempo_max = int(20)
+    tempo_inicial = time.time()
+    while (time.time() - tempo_inicial) < tempo_max:
+        sendp(pkt, iface=iface, verbose=False, inter=0.2884)
     
 
 

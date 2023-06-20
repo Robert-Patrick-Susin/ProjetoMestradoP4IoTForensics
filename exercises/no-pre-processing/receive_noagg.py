@@ -7,13 +7,11 @@ import time
 from myIoT_header import iotprotocol
 from scapy.all import TCP, get_if_list, sniff
 
-ultimo_tempo = time.time()
-
+# ultimo_tempo = time.time()
 # Começo do experimento. Quando inicia o receptor
 count = 0
 tamanho_total = 0
 # list_tempos = []
-
 
 def get_if():
     ifs=get_if_list()
@@ -37,27 +35,77 @@ def handle_pkt(pkt):
         pkt.show2()
         # tempo_atual = time.time()
         count = count + 1
-        tamanho_total = tamanho_total + sys.getsizeof(pkt)
-        tamanho_total_pkt = open("1-nopre_tamanho_total_pkt.txt","w")
-        tamanho_total_pkt.write(str(tamanho_total))
-        tamanho_total_pkt.write("\n")
-        nopre_total_pkt = open("1-nopre_total_pkt.txt","a")
+        nopre_total_pkt = open("3-nopre_total_pkt.txt","a")
         nopre_total_pkt.write(str(count))
         nopre_total_pkt.write("\n")
-        # if (count == 1200):
-            
-        # elif (count == 100):
-        #     nopre_total_pkt = open("nopre_total_pkt.txt","a")
+        tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        tamanho_total_pkt = open("3-nopre_tamanho_total_pkt.txt","a")
+        tamanho_total_pkt.write(str(tamanho_total))
+        tamanho_total_pkt.write("\n")
+        # if (count == 100):
+        #     nopre_total_pkt = open("1-nopre_total_pkt.txt","a")
         #     nopre_total_pkt.write(str(count))
         #     nopre_total_pkt.write("\n")
-        # elif (count == 200):            
-        #     nopre_total_pkt = open("nopre_total_pkt.txt","a")
+        #     tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        #     tamanho_total_pkt = open("1-nopre_tamanho_total_pkt.txt","a")
+        #     tamanho_total_pkt.write(str(tamanho_total))
+        #     tamanho_total_pkt.write("\n")
+        # elif (count == 200):
+        #     nopre_total_pkt = open("1-nopre_total_pkt.txt","a")
         #     nopre_total_pkt.write(str(count))
         #     nopre_total_pkt.write("\n")
-        # elif (count == 300):
-        #     nopre_total_pkt = open("nopre_total_pkt.txt","a")
+        #     tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        #     tamanho_total_pkt = open("1-nopre_tamanho_total_pkt.txt","a")
+        #     tamanho_total_pkt.write(str(tamanho_total))
+        #     tamanho_total_pkt.write("\n")
+        # elif (count == 300):            
+        #     nopre_total_pkt = open("1-nopre_total_pkt.txt","a")
         #     nopre_total_pkt.write(str(count))
         #     nopre_total_pkt.write("\n")
+        #     tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        #     tamanho_total_pkt = open("1-nopre_tamanho_total_pkt.txt","a")
+        #     tamanho_total_pkt.write(str(tamanho_total))
+        #     tamanho_total_pkt.write("\n")
+        # elif (count == 400):
+        #     nopre_total_pkt = open("1-nopre_total_pkt.txt","a")
+        #     nopre_total_pkt.write(str(count))
+        #     nopre_total_pkt.write("\n")
+        #     tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        #     tamanho_total_pkt = open("1-nopre_tamanho_total_pkt.txt","a")
+        #     tamanho_total_pkt.write(str(tamanho_total))
+        #     tamanho_total_pkt.write("\n")
+        # elif (count == 500):
+        #     nopre_total_pkt = open("1-nopre_total_pkt.txt","a")
+        #     nopre_total_pkt.write(str(count))
+        #     nopre_total_pkt.write("\n")
+        #     tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        #     tamanho_total_pkt = open("1-nopre_tamanho_total_pkt.txt","a")
+        #     tamanho_total_pkt.write(str(tamanho_total))
+        #     tamanho_total_pkt.write("\n")
+        # elif (count == 600):
+        #     nopre_total_pkt = open("1-nopre_total_pkt.txt","a")
+        #     nopre_total_pkt.write(str(count))
+        #     nopre_total_pkt.write("\n")
+        #     tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        #     tamanho_total_pkt = open("1-nopre_tamanho_total_pkt.txt","a")
+        #     tamanho_total_pkt.write(str(tamanho_total))
+        #     tamanho_total_pkt.write("\n")
+        # elif (count == 700):
+        #     nopre_total_pkt = open("1-nopre_total_pkt.txt","a")
+        #     nopre_total_pkt.write(str(count))
+        #     nopre_total_pkt.write("\n")
+        #     tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        #     tamanho_total_pkt = open("1-nopre_tamanho_total_pkt.txt","a")
+        #     tamanho_total_pkt.write(str(tamanho_total))
+        #     tamanho_total_pkt.write("\n")
+        # elif (count == 800):
+        #     nopre_total_pkt = open("1-nopre_total_pkt.txt","a")
+        #     nopre_total_pkt.write(str(count))
+        #     nopre_total_pkt.write("\n")
+        #     tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        #     tamanho_total_pkt = open("1-nopre_tamanho_total_pkt.txt","a")
+        #     tamanho_total_pkt.write(str(tamanho_total))
+        #     tamanho_total_pkt.write("\n")
         # list_tempos.append(tempo_atual - ultimo_tempo)
         # ultimo_tempo = tempo_atual
         # if (count > 1):
@@ -67,10 +115,10 @@ def handle_pkt(pkt):
         #     med_tx_receb_pkt = open("med_tx_receb_pkt.txt","a")
         #     med_tx_receb_pkt.write(str(median))
         #     med_tx_receb_pkt.write("\n")
-        
+        # sys.stdout.flush()
 
    
-    sys.stdout.flush()
+
 
         # Criar lista iot_agregado que sera enviado a BC, dar append nos campos
         # iot_agregado = []

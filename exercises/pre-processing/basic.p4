@@ -6,7 +6,7 @@ const bit<16> TYPE_IOTPROTOCOL = 0x1212;
 const bit<16> TYPE_IPV4 = 0x800;
 
 #define PKT_INSTANCE_TYPE_INGRESS_RECIRC 4
-#define MAX_IOT_AGG 10
+#define MAX_IOT_AGG 4
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -17,7 +17,7 @@ typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 
 register<bit<32>>(1) pontador;
-register<bit<32>>(10) banco;
+register<bit<32>>(4) banco;
 register<bit<32>>(1) iterador;
 
 header ethernet_t {
@@ -198,7 +198,7 @@ control MyIngress(inout headers hdr,
 
                 /*Le pontador e incrementa*/
                 pontador.read(meta.pointer, 0);
-                if (meta.pointer < 9){
+                if (meta.pointer < 3){
                     meta.pointer = meta.pointer + 1;
                 }
                 /*Se ele estiver cheio, ou seja, = 2, zera para recomeçar*/
@@ -244,14 +244,14 @@ control MyEgress(inout headers hdr,
         }
 
     apply {
-        /*Se contador responsavel por dizer se pacote agregado esta cheio ainda nao for 3, ou seja, n estiver cheio e tambem e maior que 0, ou seja,
+        /*Se contador responsavel por dizer se pacote agregado esta cheio ainda nao for 4, ou seja, n estiver cheio e tambem e maior que 0, ou seja,
         ja foi recirculado ao menos 1 vez, entao recircula novamente ate encher*/
-        if (meta.iterador < 10 && meta.iterador > 0) {
+        if (meta.iterador < 4 && meta.iterador > 0) {
             recirculate_preserving_field_list(0);
         }
         else {
-            /*Agora uma vez que esse contador e igual a 3, ou seja, cabeçalhos de agregaçao cheios, envio para Blockchain*/
-            if (meta.iterador == 10) {
+            /*Agora uma vez que esse contador e igual a 4, ou seja, cabeçalhos de agregaçao cheios, envio para Blockchain*/
+            if (meta.iterador == 4) {
                 ipv4_lpm_gambia.apply();
             }
         }

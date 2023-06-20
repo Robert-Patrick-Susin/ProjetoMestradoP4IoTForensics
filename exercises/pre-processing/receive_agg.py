@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 import os
 import sys
-import time
-import statistics
+# import time
+# import statistics
 
 from myIoT_header import iotprotocol
 from myIoT_agg_header import iot_agregacao
 from scapy.all import TCP, get_if_list, sniff
 
-ultimo_tempo = time.time()
-
+# ultimo_tempo = time.time()
 # Começo do experimento. Quando inicia o receptor
-count = 0  
-list_tempos = []
-
+count = 0
+tamanho_total = 0
+# list_tempos = []
 
 def get_if():
     ifs=get_if_list()
@@ -30,13 +29,18 @@ def get_if():
 # evento de recepção de pacote 
 def handle_pkt(pkt):
     global count
-    global list_tempos
-    global ultimo_tempo
-    if iotprotocol in pkt:
-        pkt.show2()
+    global tamanho_total
     if iot_agregacao in pkt:
         pkt.show2()
+        # tempo_atual = time.time()
         count = count + 1
+        nopre_total_pkt = open("2-pre_total_pkt.txt","a")
+        nopre_total_pkt.write(str(count))
+        nopre_total_pkt.write("\n")
+        tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        tamanho_total_pkt = open("2-pre_tamanho_total_pkt.txt","a")
+        tamanho_total_pkt.write(str(tamanho_total))
+        tamanho_total_pkt.write("\n")
         # tempo_atual = time.time()
         # list_tempos.append(tempo_atual - ultimo_tempo)
         # ultimo_tempo = tempo_atual
