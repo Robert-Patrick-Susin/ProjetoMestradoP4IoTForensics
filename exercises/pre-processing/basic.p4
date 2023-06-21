@@ -180,8 +180,10 @@ control MyIngress(inout headers hdr,
     }
         
     apply {
+        /*Pacote chega, é recirculado? Se sim escreve banco, se não continua*/
         if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_RECIRC) {
             escreve_banco_em_iot_agg();
+            /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle) */
             standard_metadata.egress_spec = 42;
             /*Se meta.iterador == 'valor da primeira iteração' next_hdr = 0; Senão meta.iterador == 1*/
             if (meta.iterador == 1) {
@@ -196,23 +198,55 @@ control MyIngress(inout headers hdr,
             if (hdr.ipv4.isValid()) {
                 ipv4_lpm.apply();
 
-                /*Le pontador e incrementa*/
-                pontador.read(meta.pointer, 0);
-                if (meta.pointer < 3){
-                    meta.pointer = meta.pointer + 1;
-                }
-                /*Se ele estiver cheio, ou seja, = 2, zera para recomeçar*/
-                else {
-                    meta.pointer = 0;
-                }
-                /*Sempre escreve no registrador pontador na posiçao 0 vlr meta.pointer */
-                pontador.write(0, meta.pointer);
-                /*Sempre chama funçao de escrever payload no banco*/
-                escreve_banco();
-                /*Se banco cheio clona de ingress para egress*/
-                if (meta.pointer == 0){
+                /*Somente Agregação*/
+                /*Se for dispositivo IoT sensível realiza agregação*/
+                //     /*Le pontador e incrementa*/
+                //     pontador.read(meta.pointer, 0);
+                //     if (meta.pointer < 3){
+                //         meta.pointer = meta.pointer + 1;
+                //     }
+                //     /*Se ele estiver cheio, ou seja, = 3, zera para recomeçar*/
+                //     else {
+                //         meta.pointer = 0;
+                //     }
+                //     /*Sempre escreve no registrador pontador na posiçao 0 vlr meta.pointer */
+                //     pontador.write(0, meta.pointer);
+                //     /*Sempre chama funçao de escrever payload no banco*/
+                //     escreve_banco();
+                //     /*Se banco cheio clona de ingress para egress*/
+                //     if (meta.pointer == 0){
+                //         clone(CloneType.I2E, (bit<32>)1);
+                //     }
+
+                /*Somente Filtragem*/
+                /*Se for dispositivo IoT sensível realize clone para posterior envio e gambiarra seta sua porta para host42 Blockchain*/
+                if (hdr.iotprotocol.iot_id == 1) {
                     clone(CloneType.I2E, (bit<32>)1);
+                    standard_metadata.egress_spec = 42;
                 }
+
+                /*Agregação + Filtragem*/
+                /*Se for dispositivo IoT sensível realiza agregação*/
+                // if (hdr.iot_protocol.iot_id == 1) {
+                //     /*Le pontador e incrementa*/
+                //     pontador.read(meta.pointer, 0);
+                //     if (meta.pointer < 3){
+                //         meta.pointer = meta.pointer + 1;
+                //     }
+                //     /*Se ele estiver cheio, ou seja, = 3, zera para recomeçar*/
+                //     else {
+                //         meta.pointer = 0;
+                //     }
+                //     /*Sempre escreve no registrador pontador na posiçao 0 vlr meta.pointer */
+                //     pontador.write(0, meta.pointer);
+                //     /*Sempre chama funçao de escrever payload no banco*/
+                //     escreve_banco();
+                //     /*Se banco cheio clona de ingress para egress*/
+                //     if (meta.pointer == 0){
+                //         clone(CloneType.I2E, (bit<32>)1);
+                //     }
+                // }
+
             }
         }
     }
@@ -243,27 +277,60 @@ control MyEgress(inout headers hdr,
             size = 1024;
         }
 
+    /*Apenas filtragem*/
     apply {
-        /*Se contador responsavel por dizer se pacote agregado esta cheio ainda nao for 4, ou seja, n estiver cheio e tambem e maior que 0, ou seja,
-        ja foi recirculado ao menos 1 vez, entao recircula novamente ate encher*/
-        if (meta.iterador < 4 && meta.iterador > 0) {
-            recirculate_preserving_field_list(0);
-        }
-        else {
-            /*Agora uma vez que esse contador e igual a 4, ou seja, cabeçalhos de agregaçao cheios, envio para Blockchain*/
-            if (meta.iterador == 4) {
-                ipv4_lpm_gambia.apply();
-            }
-        }
-        /*Se o pacote for clonado, significa que o banco esta cheio, logo, o contador que diz se o pacote agregado esta cheio sera zerado, e o pacote sera recirculado
-        pela primeira vez*/
+        /*Se o pacote for clonado, significa que o dispositivo é sensível e envia para Blockchain*/
         if (standard_metadata.instance_type == 1) {
-            meta.iterador = 0;
-            iterador.write(0, 0);
-            hdr.iot_agregacao[0].next_hdr = 0;
-            recirculate_preserving_field_list(0);
+            ipv4_lpm_gambia.apply();
         }
       }
+
+    // /*Somente Agregação*/
+    // apply {
+    //     /*Se contador responsavel por dizer se pacote agregado esta cheio ainda nao for 4, ou seja, n estiver cheio e tambem e maior que 0, ou seja,
+    //     ja foi recirculado ao menos 1 vez, entao recircula novamente ate encher*/
+    //     if (meta.iterador < 4 && meta.iterador > 0) {
+    //         recirculate_preserving_field_list(0);
+    //     }
+    //     else {
+    //         /*Agora uma vez que esse contador e igual a 4, ou seja, cabeçalhos de agregaçao cheios, envio para Blockchain*/
+    //         if (meta.iterador == 4) {
+    //             ipv4_lpm_gambia.apply();
+    //         }
+    //     }
+    //     /*Se o pacote for clonado, significa que o banco esta cheio, logo, o contador que diz se o pacote agregado esta cheio sera zerado, e o pacote sera recirculado
+    //     pela primeira vez*/
+    //     if (standard_metadata.instance_type == 1) {
+    //         meta.iterador = 0;
+    //         iterador.write(0, 0);
+    //         hdr.iot_agregacao[0].next_hdr = 0;
+    //         recirculate_preserving_field_list(0);
+    //     }
+    //   }
+
+    // /*Agregação + Filtragem*/
+    // apply {
+    //     /*Se contador responsavel por dizer se pacote agregado esta cheio ainda nao for 4, ou seja, n estiver cheio e tambem e maior que 0, ou seja,
+    //     ja foi recirculado ao menos 1 vez, entao recircula novamente ate encher*/
+    //     if (meta.iterador < 4 && meta.iterador > 0) {
+    //         recirculate_preserving_field_list(0);
+    //     }
+    //     else {
+    //         /*Agora uma vez que esse contador e igual a 4, ou seja, cabeçalhos de agregaçao cheios, envio para Blockchain*/
+    //         if (meta.iterador == 4) {
+    //             ipv4_lpm_gambia.apply();
+    //         }
+    //     }
+    //     /*Se o pacote for clonado, significa que o banco esta cheio, logo, o contador que diz se o pacote agregado esta cheio sera zerado, e o pacote sera recirculado
+    //     pela primeira vez*/
+    //     if (standard_metadata.instance_type == 1) {
+    //         meta.iterador = 0;
+    //         iterador.write(0, 0);
+    //         hdr.iot_agregacao[0].next_hdr = 0;
+    //         recirculate_preserving_field_list(0);
+    //     }
+    //   }
+
 }
 
 /*************************************************************************

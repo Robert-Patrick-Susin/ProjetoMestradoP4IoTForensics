@@ -11,7 +11,7 @@ Y2b = []
 X3b = []
 Y3b = []
 
-# Linhas de Agregação
+# Linhas de Filtragem
 Xa = []
 Ya = []
 X2a = []
@@ -66,7 +66,7 @@ with open('3-nopre_total_pkt.txt', 'r') as datafile:
     for ROWS in plotting:
         Y3b.append(int(ROWS[0]))
 
-# 4 Linha - Agregação 4 registradores (1 pacotes por segundo)
+# 4 Linha - Filtragem 4 registradores (1 pacotes por segundo)
 # X nr de dispositivos        
 with open('dispositivos_iot.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
@@ -74,12 +74,12 @@ with open('dispositivos_iot.txt', 'r') as datafile:
     for ROWS in plotting:
         Xa.append(int(ROWS[0]))
 # Y nr total pkt
-with open('../pre-processing/1-pre_agreg_total_pkt.txt', 'r') as datafile:
+with open('../pre-processing/1-pre_filt_total_pkt.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
     for ROWS in plotting:
         Ya.append(int(ROWS[0]))
 
-# 5 Linha - Agregação 4 registradores (2 pacotes por segundo)
+# 5 Linha - Filtragem 4 registradores (2 pacotes por segundo)
 # X nr de dispositivos
 with open('dispositivos_iot.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
@@ -87,13 +87,13 @@ with open('dispositivos_iot.txt', 'r') as datafile:
     for ROWS in plotting:
         X2a.append(int(ROWS[0]))
 # Y nr total pkt 
-with open('../pre-processing/2-pre_agreg_total_pkt.txt', 'r') as datafile:
+with open('../pre-processing/2-pre_filt_total_pkt.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
         Y2a.append(int(ROWS[0]))
 
-# 6 Linha - Agregação 4 registradores (3 pacotes por segundo)
+# 6 Linha - Filtragem 4 registradores (3 pacotes por segundo)
 # X nr de dispositivos        
 with open('dispositivos_iot.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
@@ -101,7 +101,7 @@ with open('dispositivos_iot.txt', 'r') as datafile:
     for ROWS in plotting:
         X3a.append(int(ROWS[0]))
 # Y nr total pkt 
-with open('../pre-processing/3-pre_agreg_total_pkt.txt', 'r') as datafile:
+with open('../pre-processing/3-pre_filt_total_pkt.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
@@ -114,10 +114,10 @@ plt.plot(Xb, Yb, 'o-', label='Baseline (workload a)')
 plt.plot(X2b, Y2b, 'o-', label='Baseline (workload b)')
 plt.plot(X3b, Y3b, 'o-', label='Baseline (workload c)')
 
-# Marcar linhas com Agregação
-plt.plot(Xa, Ya, 'o-', label='Agregação (workload a)')
-plt.plot(X2a, Y2a, 'o-', label='Agregação (workload b)')
-plt.plot(X3a, Y3a, 'o-', label='Agregação (workload c)')
+# Marcar linhas com Filtragem
+plt.plot(Xa, Ya, 'o-', label='Filtragem (workload a)')
+plt.plot(X2a, Y2a, 'o-', label='Filtragem (workload b)')
+plt.plot(X3a, Y3a, 'o-', label='Filtragem (workload c)')
 
 plt.legend()
 plt.grid(True)

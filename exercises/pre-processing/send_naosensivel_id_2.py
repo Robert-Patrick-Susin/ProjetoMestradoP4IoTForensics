@@ -37,7 +37,8 @@ def main():
     # else:
     print("sending on interface {} to IP addr {}".format(iface, str(addr)))
     pkt =  Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff')
-    pkt = pkt / iotprotocol(iot_id=5, iot_leituras=3) / IP(dst=addr) / TCP(dport=1234, sport=random.randint(49152,65535)) / args.message
+    # ID 2 não sensível
+    pkt = pkt / iotprotocol(iot_id=2, iot_leituras=3) / IP(dst=addr) / TCP(dport=1234, sport=random.randint(49152,65535)) / args.message
 
     pkt.show2()
 #    hexdump(pkt)
@@ -48,12 +49,13 @@ def main():
     #     x = x + 1
 
 #Enviar pacotes por somente 20 segundos
+#inter = 1 (1 pkt por seg)
 #inter = 0.462 (Aprox 2 pkt por seg)
-#inter = 0.2884 (Aprox 3 pkt por seg)
+#inter = 0.2886 (Aprox 3 pkt por seg)
     tempo_max = int(20)
     tempo_inicial = time.time()
     while (time.time() - tempo_inicial) < tempo_max:
-        sendp(pkt, iface=iface, verbose=False, inter=0.462)
+        sendp(pkt, iface=iface, verbose=False, inter=1)
     
 
 
