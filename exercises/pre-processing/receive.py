@@ -30,15 +30,17 @@ def get_if():
 def handle_pkt(pkt):
     global count
     global tamanho_total
+    # IF iotprotocol usado para quando há somente filtragem
+    # if iotprotocol in pkt:
     if iot_agregacao in pkt:
         pkt.show2()
         # tempo_atual = time.time()
         count = count + 1
-        nopre_total_pkt = open("1-pre_filt_total_pkt.txt","a")
+        nopre_total_pkt = open("3-pre_agreg_filt_total_pkt.txt","a")
         nopre_total_pkt.write(str(count))
         nopre_total_pkt.write("\n")
         tamanho_total = tamanho_total + sys.getsizeof(pkt)
-        tamanho_total_pkt = open("1-pre_filt_tamanho_total_pkt.txt","a")
+        tamanho_total_pkt = open("3-pre_agreg_filt_tamanho_total_pkt.txt","a")
         tamanho_total_pkt.write(str(tamanho_total))
         tamanho_total_pkt.write("\n")
         # tempo_atual = time.time()
