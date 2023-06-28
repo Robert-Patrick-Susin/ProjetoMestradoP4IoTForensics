@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 import os
 import sys
-# import time
-# import statistics
+import time
+import statistics
 
 from myIoT_header import iotprotocol
 from myIoT_agg_header import iot_agregacao
 from scapy.all import TCP, get_if_list, sniff
 
-# ultimo_tempo = time.time()
+ultimo_tempo = time.time()
 # Começo do experimento. Quando inicia o receptor
 count = 0
 tamanho_total = 0
-# list_tempos = []
+list_tempos = []
 
 def get_if():
     ifs=get_if_list()
@@ -29,30 +29,32 @@ def get_if():
 # evento de recepção de pacote 
 def handle_pkt(pkt):
     global count
-    global tamanho_total
+    # global tamanho_total
+    global tempo_atual
+    global ultimo_tempo
     # IF iotprotocol usado para quando há somente filtragem
     # if iotprotocol in pkt:
     if iot_agregacao in pkt:
         pkt.show2()
-        # tempo_atual = time.time()
         count = count + 1
-        nopre_total_pkt = open("3-pre_agreg_filt_total_pkt.txt","a")
-        nopre_total_pkt.write(str(count))
-        nopre_total_pkt.write("\n")
-        tamanho_total = tamanho_total + sys.getsizeof(pkt)
-        tamanho_total_pkt = open("3-pre_agreg_filt_tamanho_total_pkt.txt","a")
-        tamanho_total_pkt.write(str(tamanho_total))
-        tamanho_total_pkt.write("\n")
-        # tempo_atual = time.time()
-        # list_tempos.append(tempo_atual - ultimo_tempo)
-        # ultimo_tempo = tempo_atual
-        # if (count > 1):
-        #     median = (statistics.median(list_tempos[1:]))
-        #     # Abre o arquivo med_tx_receb_pkt.txt e escreve a media 
-        #     # da taxa de recebimento de count pacotes
-        #     med_tx_receb_pkt = open("med_tx_receb_pkt.txt","a")
-        #     med_tx_receb_pkt.write(str(median))
-        #     med_tx_receb_pkt.write("\n")
+        # nopre_total_pkt = open("3-pre_agreg_filt_total_pkt.txt","a")
+        # nopre_total_pkt.write(str(count))
+        # nopre_total_pkt.write("\n")
+        # tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        # tamanho_total_pkt = open("3-pre_agreg_filt_tamanho_total_pkt.txt","a")
+        # tamanho_total_pkt.write(str(tamanho_total))
+        # tamanho_total_pkt.write("\n")
+        tempo_atual = time.time()
+        list_tempos.append(tempo_atual - ultimo_tempo)
+        ultimo_tempo = tempo_atual
+        if (count > 1):
+            median = (statistics.median(list_tempos[1:]))
+            # Abre o arquivo 4-pre_med_rec_pkt.txt e escreve a media 
+            # da taxa de recebimento de count pacotes
+            pre_med_rec_pkt = open("metricas/4-pre_med_rec_pkt.txt","w")
+            pre_med_rec_pkt.write(str(median))
+            pre_med_rec_pkt.write("\n")
+            pre_med_rec_pkt.write(str(count))
         
 
   
