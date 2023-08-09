@@ -34,14 +34,14 @@ def handle_pkt(pkt):
     if iotprotocol in pkt:
         pkt.show2()
         # tempo_atual = time.time()
-        count = count + 1
-        nopre_total_pkt = open("3-nopre_total_pkt.txt","a")
-        nopre_total_pkt.write(str(count))
-        nopre_total_pkt.write("\n")
-        tamanho_total = tamanho_total + sys.getsizeof(pkt)
-        tamanho_total_pkt = open("3-nopre_tamanho_total_pkt.txt","a")
-        tamanho_total_pkt.write(str(tamanho_total))
-        tamanho_total_pkt.write("\n")
+        # count = count + 1
+        # nopre_total_pkt = open("3-nopre_total_pkt.txt","a")
+        # nopre_total_pkt.write(str(count))
+        # nopre_total_pkt.write("\n")
+        # tamanho_total = tamanho_total + sys.getsizeof(pkt)
+        # tamanho_total_pkt = open("3-nopre_tamanho_total_pkt.txt","a")
+        # tamanho_total_pkt.write(str(tamanho_total))
+        # tamanho_total_pkt.write("\n")
         # if (count == 100):
         #     nopre_total_pkt = open("1-nopre_total_pkt.txt","a")
         #     nopre_total_pkt.write(str(count))

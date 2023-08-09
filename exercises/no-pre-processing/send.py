@@ -48,12 +48,13 @@ def main():
     #     x = x + 1
 
 #Enviar pacotes por somente 20 segundos
+#inter = 1 (1 pkt por seg)
 #inter = 0.462 (Aprox 2 pkt por seg)
-#inter = 0.2884 (Aprox 3 pkt por seg)
+#inter = 0.2886 (Aprox 3 pkt por seg)
     tempo_max = int(20)
     tempo_inicial = time.time()
     while (time.time() - tempo_inicial) < tempo_max:
-        sendp(pkt, iface=iface, verbose=False, inter=0.2884)
+        sendp(pkt, iface=iface, verbose=False, inter=0.2886)
     
 
 
