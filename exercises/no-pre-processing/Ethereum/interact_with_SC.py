@@ -1,10 +1,10 @@
 from web3 import Web3
 
 ##For connecting to ganache##
-w3 = Web3(Web3.HTTPProvider("http://0.0.0.0:8545"))
+w3 = Web3(Web3.HTTPProvider("http://10.0.2.15:7545"))
 chain_id = 1337
-caller = "0x86d822Ca7E181E1779788253d3CfFEa292b4Ab1f"
-private_key = "0x783c3e5120b060bee7763a2aea1c78cea7a42d6f749925bda6732d0be20df5d8" # leaving the private key like this is very insecure if you are working on real world project
+caller = "0xD1010bd90A3cb6045f9B1cC7622E148BC399cC75"
+private_key = "0xe552a4487eae3ac3796edadfdfa8a97482bb022de42778496f2a57f1c03d2829" # leaving the private key like this is very insecure if you are working on real world project
 
 
 ##Initialize smart contract and account##
