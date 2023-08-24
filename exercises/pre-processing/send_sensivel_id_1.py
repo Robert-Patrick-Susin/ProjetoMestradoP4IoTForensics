@@ -56,7 +56,7 @@ def main():
     # tempo_inicial = time.time()
     # while (time.time() - tempo_inicial) < tempo_max:
         # sendp(pkt, iface=iface, verbose=False, inter=0.2886)
-    sendpfast(pkt, iface=iface, pps=110, loop=10000)
+    sendpfast(pkt, iface=iface, pps=5, loop=10000)
     
 
 
