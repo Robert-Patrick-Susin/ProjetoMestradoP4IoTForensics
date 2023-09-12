@@ -19,6 +19,7 @@ typedef bit<32> ip4Addr_t;
 register<bit<32>>(1) pontador;
 register<bit<32>>(3) banco;
 register<bit<32>>(1) iterador;
+register<bit<32>>(1) config;
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -156,7 +157,7 @@ control MyIngress(inout headers hdr,
         hdr.iot_agregacao[0].setValid();
         /*Declara variavel local para armazenar o payload*/
         bit<32> armazena_payload = 0;
-        /*Armazena na variavel aggregated_data o vlr da posicao meta.iterador*/
+        /*Armazena na variavel armazena_payload o vlr da posicao meta.iterador*/
         banco.read(armazena_payload, meta.iterador);
         /*Armazena na variavel iot_agg o vlr do payload em armazena_payload*/
         hdr.iot_agregacao[0].iot_agg = (bit<16>)armazena_payload;
@@ -180,10 +181,54 @@ control MyIngress(inout headers hdr,
     }
         
     apply {
-        /*Pacote chega, é recirculado? Se sim escreve banco, se não continua*/
-        if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_RECIRC) {
+        /* Se config = 1 então somente Agregação */
+        if (config = 1) {
+        /*Pacote chega, é recirculado? Se sim escreve banco, senão primeira agregação*/
+            if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_RECIRC) {
+                escreve_banco_em_iot_agg();
+                /* Gambiarra para forçar porta de saída para host 42 (Blockchain) */
+                standard_metadata.egress_spec = 42;
+                /*Se meta.iterador == 'valor da primeira iteração' next_hdr = 0; Senão meta.iterador == 1*/
+                if (meta.iterador == 1) {
+                    hdr.iot_agregacao[0].next_hdr = 0;
+                }
+                else {
+                    hdr.iot_agregacao[0].next_hdr = 1;
+                    hdr.iotprotocol.next_hdr = 1;
+                }
+            }
+            else {
+                if (hdr.ipv4.isValid()) {
+                    ipv4_lpm.apply();
+
+                    /*Somente Agregação*/
+                    /*Le pontador e incrementa*/
+                    pontador.read(meta.pointer, 0);
+                    if (meta.pointer < 3){
+                        meta.pointer = meta.pointer + 1;
+                    }
+                    /*Se ele estiver cheio, ou seja, = 3, zera para recomeçar*/
+                    else {
+                        meta.pointer = 0;
+                    }
+                    /*Sempre escreve no registrador pontador na posiçao 0 vlr meta.pointer */
+                    pontador.write(0, meta.pointer);
+                    /*Sempre chama funçao de escrever payload no banco*/
+                    escreve_banco();
+                    /*Se banco cheio clona de ingress para egress*/
+                    if (meta.pointer == 0){
+                        clone(CloneType.I2E, (bit<32>)1);
+                    }
+                }
+            }
+        }
+        else {
+            /* Se config = 2 então Filtragem + Agregação */
+            if (config = 2) {
+            /*Pacote chega, é recirculado? Se sim escreve banco, senão primeira agregação*/
+            if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_RECIRC) {
             escreve_banco_em_iot_agg();
-            /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle) */
+            /* Gambiarra para forçar porta de saída para host 42 (Blockchain) */
             standard_metadata.egress_spec = 42;
             /*Se meta.iterador == 'valor da primeira iteração' next_hdr = 0; Senão meta.iterador == 1*/
             if (meta.iterador == 1) {
@@ -193,40 +238,12 @@ control MyIngress(inout headers hdr,
                 hdr.iot_agregacao[0].next_hdr = 1;
                 hdr.iotprotocol.next_hdr = 1;
             }
-        }
-        else {
-            if (hdr.ipv4.isValid()) {
-                ipv4_lpm.apply();
-
-                /*Somente Agregação*/
-                /*Se for dispositivo IoT sensível realiza agregação*/
-                //     /*Le pontador e incrementa*/
-                //     pontador.read(meta.pointer, 0);
-                //     if (meta.pointer < 3){
-                //         meta.pointer = meta.pointer + 1;
-                //     }
-                //     /*Se ele estiver cheio, ou seja, = 3, zera para recomeçar*/
-                //     else {
-                //         meta.pointer = 0;
-                //     }
-                //     /*Sempre escreve no registrador pontador na posiçao 0 vlr meta.pointer */
-                //     pontador.write(0, meta.pointer);
-                //     /*Sempre chama funçao de escrever payload no banco*/
-                //     escreve_banco();
-                //     /*Se banco cheio clona de ingress para egress*/
-                //     if (meta.pointer == 0){
-                //         clone(CloneType.I2E, (bit<32>)1);
-                //     }
-
-                /*Somente Filtragem*/
-                /*Se for dispositivo IoT sensível realize clone para posterior envio e gambiarra seta sua porta para host42 Blockchain*/
-                // if (hdr.iotprotocol.iot_id == 1) {
-                //     clone(CloneType.I2E, (bit<32>)1);
-                // }
-
-                /*Agregação + Filtragem*/
-                /*Se for dispositivo IoT sensível realiza agregação*/
-                if (hdr.iotprotocol.iot_id == 1) {
+            }
+            else {
+                if (hdr.ipv4.isValid()) {
+                    ipv4_lpm.apply();
+                    /*Se for dispositivo IoT sensível realiza agregação*/
+                    if (hdr.iotprotocol.iot_id == 1) {
                     /*Le pontador e incrementa*/
                     pontador.read(meta.pointer, 0);
                     if (meta.pointer < 2){
@@ -244,11 +261,22 @@ control MyIngress(inout headers hdr,
                     if (meta.pointer == 0){
                         clone(CloneType.I2E, (bit<32>)1);
                     }
+                    }
                 }
-
+            }
             }
         }
-    }
+        else {
+            /* Se config = 3 então somente Filtragem*/
+            if (config = 3) {
+                /*Somente Filtragem*/
+                /*Se for dispositivo IoT sensível realize clone para posterior envio e gambiarra seta sua porta para host42 Blockchain*/
+                if (hdr.iotprotocol.iot_id == 1) {
+                    clone(CloneType.I2E, (bit<32>)1);
+                }
+            }                
+        }
+
 }
 
 /*************************************************************************
