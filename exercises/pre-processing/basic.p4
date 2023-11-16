@@ -151,18 +151,19 @@ control MyIngress(inout headers hdr,
     novo cabeçalho iot_agregacao na posicao reposicionada sendo 0, no vlr iot_leituras para o iot_agg.
     */
     action escreve_banco_em_iot_agg() {
+        /*Armazena na variavel meta.iterador o vlr do registrador iterador na posicao 0*/
 	 	iterador.read(meta.iterador, 0);
         hdr.iot_agregacao.push_front(1);
         hdr.iot_agregacao[0].setValid();
         /*Declara variavel local para armazenar o payload*/
         bit<32> armazena_payload = 0;
-        /*Armazena na variavel aggregated_data o vlr da posicao meta.iterador*/
+        /*Armazena na variavel armazena_payload o vlr do registrador Banco na posicao meta.iterador*/
         banco.read(armazena_payload, meta.iterador);
         /*Armazena na variavel iot_agg o vlr do payload em armazena_payload*/
         hdr.iot_agregacao[0].iot_agg = (bit<16>)armazena_payload;
         /*Soma 1 no iterador para pegar a proxima posicao na proxima iteraçao*/
         meta.iterador = meta.iterador + 1;
-        /*Armazena o novo vlr somado meta.iterador no registrador iterador na posiçao 0*/
+        /*Escreve o novo vlr somado meta.iterador no registrador iterador na posiçao 0*/
         iterador.write(0, meta.iterador);
     }
 
@@ -199,7 +200,7 @@ control MyIngress(inout headers hdr,
         
     apply {
         /*Manter ordem, verificar se o pacote que chega já foi recirculado, ou seja, já passou por algum programa de Agregação, pois ele não pode ser mapeado novamente*/
-        if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_RECIRC) {
+        if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_RECIRC) {}
 
             /*Se já foi recirculado, de qual round ele é? Qual programa ele pertence? Qual lógica a ser executada?*/
 
@@ -229,14 +230,12 @@ control MyIngress(inout headers hdr,
             /*Segunda verificação com comparação ao identificador de Agregação com a próxima função a ser executada (Agregação = 2)*/
             /*Decisor 2*/
             if (meta.custom_metadata.proximo_pproc == 2) {
-
+                meta.custom_metadata.pkt_agregado = 1;
                 /*Código da Agregação*/
-                /*Pacote chega, é recirculado? Se sim escreve banco, se não continua*/
-                if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_RECIRC) {
                     escreve_banco_em_iot_agg();
-                    /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle) */
+                    /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle / Blockchain) */
                     standard_metadata.egress_spec = 42;
-                    /*Se meta.iterador == 'valor da primeira iteração' next_hdr = 0; Senão meta.iterador == 1*/
+                    /*Decisor para ordenar cabeçalhos. Se meta.iterador == 'valor da primeira iteração' next_hdr = 0; Senão next_hdr = 1*/
                     if (meta.iterador == 1) {
                         hdr.iot_agregacao[0].next_hdr = 0;
                     }
@@ -244,33 +243,30 @@ control MyIngress(inout headers hdr,
                         hdr.iot_agregacao[0].next_hdr = 1;
                         hdr.iotprotocol.next_hdr = 1;
                     }
-                }
 
             else {
-                        if (hdr.ipv4.isValid()) {
-                            ipv4_lpm.apply();
+                    if (hdr.ipv4.isValid()) {
+                        ipv4_lpm.apply();
 
-                            /*Agregação + Filtragem*/
-                            /*Se for dispositivo IoT sensível realiza agregação*/
-                            if (hdr.iotprotocol.iot_id == 1) {
-                                /*Le pontador e incrementa*/
-                                pontador.read(meta.pointer, 0);
-                                if (meta.pointer < 2){
-                                    meta.pointer = meta.pointer + 1;
-                                }
-                                /*Se ele estiver cheio, ou seja, = 3, zera para recomeçar*/
-                                else {
-                                    meta.pointer = 0;
-                                }
-                                /*Sempre escreve no registrador pontador na posiçao 0 vlr meta.pointer */
-                                pontador.write(0, meta.pointer);
-                                /*Sempre chama funçao de escrever payload no banco*/
-                                escreve_banco();
-                                /*Se banco cheio clona de ingress para egress*/
-                                if (meta.pointer == 0){
-                                    clone(CloneType.I2E, (bit<32>)1);
-                                }
-                            }
+                        /*Agregação*/
+
+                        /*Le pontador e incrementa*/
+                        pontador.read(meta.pointer, 0);
+                        if (meta.pointer < 2){
+                             meta.pointer = meta.pointer + 1;
+                        }
+                        /*Se ele estiver cheio, ou seja, zera para recomeçar*/
+                        else {
+                             meta.pointer = 0;
+                        }
+                            /*Sempre escreve no registrador pontador na posiçao 0 vlr meta.pointer*/
+                            pontador.write(0, meta.pointer);
+                            /*Sempre chama funçao de escrever payload no banco*/
+                            escreve_banco();
+                            /*Se banco cheio clona de ingress para egress*/
+                            if (meta.pointer == 0){
+                                 clone(CloneType.I2E, (bit<32>)1);
+                             } 
                         }
                     }
                 }
