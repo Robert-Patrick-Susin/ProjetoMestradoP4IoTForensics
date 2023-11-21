@@ -168,10 +168,10 @@ control MyIngress(inout headers hdr,
     }
 
     /*Biblioteca + Tabela de módulos*/
-    action biblioteca(bit<8> m_pproc_01, bit<8> m_pproc_02, bit<32> ttl_rounds, egressSpec_t port) {
+    action biblioteca(bit<8> m_pproc_01, bit<8> m_pproc_02, bit<32> ttl_rodadas, egressSpec_t port) {
         meta.custom_metadata.m_pproc_01  =  m_pproc_01;
         meta.custom_metadata.m_pproc_02  =  m_pproc_02;
-        meta.custom_metadata.total_rounds = ttl_rounds;
+        meta.custom_metadata.total_rodadas = ttl_rodadas;
         standard_metadata.egress_spec = port;
      }
 
@@ -199,14 +199,12 @@ control MyIngress(inout headers hdr,
     }
         
     apply {
-        /*Manter ordem, verificar se o pacote que chega já foi recirculado, ou seja, já passou por algum programa de Agregação, pois ele não pode ser mapeado novamente*/
-        if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_RECIRC) {}
 
-            /*Se já foi recirculado, de qual round ele é? Qual programa ele pertence? Qual lógica a ser executada?*/
-
-        else {
-        /*Verifica se o round é o primeiro, se for realiza mapeamento*/
-        if (meta.custom_metadata.rounds == 0){
+        /*Verifica se a rodada é a primeira, se for realiza match+action IPV4 & Mapeamento*/
+        if (meta.custom_metadata.rodadas == 0){
+            if (hdr.ipv4.isValid()) {
+                ipv4_lpm.apply();
+            }
 
             /*Executa tabela de mapeamento e biblioteca para mapear a ordem de pré-processamento que o usuário inseriu*/ 
             mapeamento.apply();
@@ -214,23 +212,23 @@ control MyIngress(inout headers hdr,
             /*Metadado de próximo módulo de pré-processamento recebe a primeira função ser executada*/
             meta.custom_metadata.proximo_pproc = meta.custom_metadata.m_pproc_01;
         }
-        }
+
+        /*Senão se a rodada é a segunda, ajeita segunda função a ser executada*/
+        else if (meta.custom_metadata.rodadas == 1){
             
-            /*Primeira verificação com comparação ao identificador de Filtragem com a próxima função a ser executada (Filtragem = 1)*/
+            /*Metadado de próximo módulo de pré-processamento recebe a segunda função ser executada*/
+            meta.custom_metadata.proximo_pproc = meta.custom_metadata.m_pproc_02;   
+        }
+
+        /*Senão se a rodada atingiu o total, adiciona metadado e marca como finalizado*/
+        else if (meta.custom_metadata.rodadas == meta.custom_metadata.total_rodadas){
+                /*Se rodadas for igual ao número total, então o pré-processamento foi finalizado, flagar aqui para ser enviado*/
+                    meta.custom_metadata.finalizado = 0;
+        }            
+
+            /*Primeira verificação com comparação ao identificador de Agregação com a próxima função a ser executada (Agregação = 1)*/
             /*Decisor 1*/
             if (meta.custom_metadata.proximo_pproc == 1) {
-
-                /*Código de Filtragem*/
-                if (hdr.iotprotocol.iot_id == 1) {
-                    /*Teste redundante para informar que o pacote foi filtrado, 1 = Filtrado*/
-                    meta.custom_metadata.pkt_filtrado = 1;
-                }
-            }
-
-            /*Segunda verificação com comparação ao identificador de Agregação com a próxima função a ser executada (Agregação = 2)*/
-            /*Decisor 2*/
-            if (meta.custom_metadata.proximo_pproc == 2) {
-                meta.custom_metadata.pkt_agregado = 1;
                 /*Código da Agregação*/
                     escreve_banco_em_iot_agg();
                     /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle / Blockchain) */
@@ -263,14 +261,25 @@ control MyIngress(inout headers hdr,
                             pontador.write(0, meta.pointer);
                             /*Sempre chama funçao de escrever payload no banco*/
                             escreve_banco();
-                            /*Se banco cheio clona de ingress para egress*/
+                            /*Se banco cheio ele será recirculado, coloca metadado que marca agregação e clona de ingress para egress*/
                             if (meta.pointer == 0){
+                                meta.custom_metadata.pkt_agregado = 1;
                                  clone(CloneType.I2E, (bit<32>)1);
-                             } 
+                            } 
                         }
-                    }
+            }
+            }
+
+            /*Segunda verificação com comparação ao identificador de Filtragem com a próxima função a ser executada (Filtragem = 2)*/
+            /*Decisor 2*/
+            if (meta.custom_metadata.proximo_pproc == 2) {
+
+                /*Código de Filtragem*/
+                if (hdr.iotprotocol.iot_id == 1) {
+                    /*Coloca metadado que marca filtragem*/
+                    meta.custom_metadata.pkt_filtrado = 1;
                 }
-            }       
+            }     
 }
 
 /*************************************************************************
