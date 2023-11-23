@@ -210,7 +210,7 @@ control MyIngress(inout headers hdr,
             mapeamento.apply();
 
             /*Metadado de próximo módulo de pré-processamento recebe a primeira função ser executada*/
-            meta.custom_metadata.proximo_pproc = meta.custom_metadata.m_pproc_01;
+            meta.custom_metadata.proximo_pproc = meta.custom_metadata.m_pproc_01;   
         }
 
         /*Senão se a rodada é a segunda, ajeita segunda função a ser executada*/
@@ -226,60 +226,64 @@ control MyIngress(inout headers hdr,
                     meta.custom_metadata.finalizado = 0;
         }            
 
-            /*Primeira verificação com comparação ao identificador de Agregação com a próxima função a ser executada (Agregação = 1)*/
-            /*Decisor 1*/
-            if (meta.custom_metadata.proximo_pproc == 1) {
-                /*Código da Agregação*/
-                    escreve_banco_em_iot_agg();
-                    /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle / Blockchain) */
-                    standard_metadata.egress_spec = 42;
-                    /*Decisor para ordenar cabeçalhos. Se meta.iterador == 'valor da primeira iteração' next_hdr = 0; Senão next_hdr = 1*/
-                    if (meta.iterador == 1) {
-                        hdr.iot_agregacao[0].next_hdr = 0;
-                    }
-                    else {
-                        hdr.iot_agregacao[0].next_hdr = 1;
-                        hdr.iotprotocol.next_hdr = 1;
-                    }
+        /*Código da Agregação*/
+        /*Primeira verificação com comparação ao identificador de Agregação com a próxima função a ser executada (Agregação = 1), se for inicia módulo Agregação*/
+        if (meta.custom_metadata.proximo_pproc == 1) {
 
-            else {
-                    if (hdr.ipv4.isValid()) {
-                        ipv4_lpm.apply();
+            /*Pacote chega, é um pacote agregado? Ou seja, foi clonado e recirculado, e logo, o Banco está Cheio? Se sim escreve banco*/
+            if (meta.custom_metadata.pkt_agregado == 1) {
+            escreve_banco_em_iot_agg();
 
-                        /*Agregação*/
+            /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle / Blockchain) */
+            standard_metadata.egress_spec = 42;
 
-                        /*Le pontador e incrementa*/
-                        pontador.read(meta.pointer, 0);
-                        if (meta.pointer < 2){
-                             meta.pointer = meta.pointer + 1;
-                        }
-                        /*Se ele estiver cheio, ou seja, zera para recomeçar*/
-                        else {
-                             meta.pointer = 0;
-                        }
-                            /*Sempre escreve no registrador pontador na posiçao 0 vlr meta.pointer*/
-                            pontador.write(0, meta.pointer);
-                            /*Sempre chama funçao de escrever payload no banco*/
-                            escreve_banco();
-                            /*Se banco cheio ele será recirculado, coloca metadado que marca agregação e clona de ingress para egress*/
-                            if (meta.pointer == 0){
-                                meta.custom_metadata.pkt_agregado = 1;
-                                 clone(CloneType.I2E, (bit<32>)1);
-                            } 
-                        }
-            }
-            }
-
-            /*Segunda verificação com comparação ao identificador de Filtragem com a próxima função a ser executada (Filtragem = 2)*/
-            /*Decisor 2*/
-            if (meta.custom_metadata.proximo_pproc == 2) {
-
-                /*Código de Filtragem*/
-                if (hdr.iotprotocol.iot_id == 1) {
-                    /*Coloca metadado que marca filtragem*/
-                    meta.custom_metadata.pkt_filtrado = 1;
+                /*Decisor para ordenar cabeçalhos. Se meta.iterador == 'valor da primeira iteração' next_hdr = 0; Senão next_hdr = 1*/
+                if (meta.iterador == 1) {
+                    hdr.iot_agregacao[0].next_hdr = 0;
                 }
-            }     
+                else {
+                    hdr.iot_agregacao[0].next_hdr = 1;
+                    hdr.iotprotocol.next_hdr = 1;
+                }
+            }
+
+            /*Senão for um pacote agregado, ou seja, clonado e recirculado, o banco não está cheio ainda, continua copiando*/
+            else {
+
+                /*Le pontador e incrementa*/
+                pontador.read(meta.pointer, 0);
+                if (meta.pointer < 2){
+                        meta.pointer = meta.pointer + 1;
+                }
+
+                /*Se ele estiver cheio zera para recomeçar*/
+                else {
+                    meta.pointer = 0;
+                }
+
+                /*Sempre escreve no registrador pontador na posiçao 0 vlr meta.pointer*/
+                pontador.write(0, meta.pointer);
+
+                /*Sempre chama funçao de escrever payload no banco*/
+                escreve_banco();
+
+                /*Se o banco estiver cheio, este último pacote será clonado I2E para sucessiva recirculação e marcado como agregado*/
+                if (meta.pointer == 0){
+                    meta.custom_metadata.pkt_agregado = 1;
+                        clone(CloneType.I2E, (bit<32>)1);
+                }
+            }
+        }
+
+        /*Código de Filtragem*/
+        /*Segunda verificação com comparação ao identificador de Filtragem com a próxima função a ser executada (Filtragem = 2)*/
+        if (meta.custom_metadata.proximo_pproc == 2) {
+
+            /*Verifica se ID de cabeçalho é igual 1 (Sensível), se for coloca metadado que marca filtragem*/
+            if (hdr.iotprotocol.iot_id == 1) {
+                meta.custom_metadata.pkt_filtrado = 1;
+            }
+        }
 }
 
 /*************************************************************************
