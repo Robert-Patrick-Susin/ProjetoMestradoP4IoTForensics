@@ -327,7 +327,7 @@ control MyEgress(inout headers hdr,
 
     apply {
 
-        /*O pacote que chega pertence ao módulo 1 Agregação? Se sim executa lógica Agg, senão próximo decisor*/
+        /*O pacote que chega pertence ao módulo 1 Agregação? Se sim executa lógica Agg*/
         if (meta.custom_metadata.pkt_agregado == 1){
 
             /*Se contador responsavel por dizer se pacote agregado esta cheio ainda nao for 3, ou seja, n estiver cheio e tambem e maior que 0, ou seja,
@@ -355,7 +355,7 @@ control MyEgress(inout headers hdr,
             }
         }
 
-        /*O pacote que chega pertence ao módulo 1 Agregação? Se sim executa lógica Agg, senão próximo decisor*/
+        /*O pacote que chega pertence ao módulo 2 Filtragem? Se sim executa lógica Filt*/
         if (meta.custom_metadata.pkt_filtrado == 1){
 
             /*Remove Metadado que marca como pré-processado por 2 (Filtragem) & Soma +1 no Round*/
@@ -367,7 +367,6 @@ control MyEgress(inout headers hdr,
         if (meta.custom_metadata.finalizado == 1){
         	ipv4_lpm_gambia.apply();
         }
-
     }
 }
 
