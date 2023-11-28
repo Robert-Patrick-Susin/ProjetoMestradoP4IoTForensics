@@ -101,8 +101,8 @@ parser MyParser(packet_in packet,
 
     state parse_iotprotocol {
         packet.extract(hdr.iotprotocol);
-        transition select (standard_metadata.instance_type) {
-            PKT_INSTANCE_TYPE_INGRESS_RECIRC: parse_iot_agregacao;
+        transition select (meta.custom_metadata.pkt_agregado) {
+            1: parse_iot_agregacao;
             default: parse_ipv4;
         }
     }
@@ -190,7 +190,7 @@ control MyIngress(inout headers hdr,
 
     table mapeamento{
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.srcAddr: lpm;
         }
         actions = {
             biblioteca;
@@ -235,7 +235,6 @@ control MyIngress(inout headers hdr,
 
         /*Senão se a rodada atingiu o total, adiciona metadado e marca como finalizado*/
         else if (meta.custom_metadata.rodadas == meta.custom_metadata.total_rodadas){
-                /*Se rodadas for igual ao número total, então o pré-processamento foi finalizado, flagar aqui para ser enviado*/
                     meta.custom_metadata.finalizado = 1;
         }            
 
@@ -338,8 +337,12 @@ control MyEgress(inout headers hdr,
 
             /*Agora uma vez que esse contador e igual a 3, ou seja, cabeçalhos de agregaçao cheios, removo metadado que marca como pré-processado por 1 (Agregação)
              & Soma +1 no Round*/
+            
+            /*TODO*/
+             /*Pensar nessa lógica no começo para evitar que atualize o próx programa quando se está coletando pkts de agg*/
             else {
                 if (meta.iterador == 3) {
+                    /*Pensar em remover isso ou colocar mais uma condição*/
                     meta.custom_metadata.pkt_agregado = 0;
                     meta.custom_metadata.rodadas = meta.custom_metadata.rodadas + 1;
                 }
@@ -357,15 +360,25 @@ control MyEgress(inout headers hdr,
 
         /*O pacote que chega pertence ao módulo 2 Filtragem? Se sim executa lógica Filt*/
         if (meta.custom_metadata.pkt_filtrado == 1){
+            
+            /*Lógica que aplica filtragem*/
+            /*Se dispositivo ID 1,2,3 então descarta pacote*/
+            /*outCtrl.outputPort=DROP_PORT; Comando para descartar pacote, usar quando é filtrado? Repensar*/
 
             /*Remove Metadado que marca como pré-processado por 2 (Filtragem) & Soma +1 no Round*/
             meta.custom_metadata.pkt_filtrado = 0;
             meta.custom_metadata.rodadas = meta.custom_metadata.rodadas + 1;
+
+            /*Lógica PRIME, recircula quando terminar para próximo programa, mas a filtragem é sempre o último programa independente da ordem
+            recirculate_preserving_field_list(0);*/
         }
 
-        /*O pacote que chega já foi finalizado? Se sim envia para Blockchain*/
+        /*O pacote que chega já foi finalizado? Se realiza verificações para posterior envio para a Blockchain*/
         if (meta.custom_metadata.finalizado == 1){
         	ipv4_lpm_gambia.apply();
+            /*TODO, coletou inf pra ir pra BC?*/
+            if agregado && manda 
+           
         }
     }
 }
