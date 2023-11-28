@@ -358,7 +358,7 @@ control MyEgress(inout headers hdr,
             }
         }
 
-        /*dO pacote que chega pertence ao módulo 2 Filtragem? Se sim executa lógica Filt*/
+        /*O pacote que chega pertence ao módulo 2 Filtragem? Se sim executa lógica Filt*/
         if (meta.custom_metadata.pkt_filtrado == 1){
             
             /*Lógica que aplica filtragem*/
