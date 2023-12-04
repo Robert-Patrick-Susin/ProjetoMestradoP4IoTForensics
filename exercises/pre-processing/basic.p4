@@ -4,8 +4,11 @@
 
 const bit<16> TYPE_IOTPROTOCOL = 0x1212;
 const bit<16> TYPE_IPV4 = 0x800;
+const bit<8> RECIRC_FL_1 = 3;
+const bit<9> DROP_PORT = 0xF;
 
 #define PKT_INSTANCE_TYPE_INGRESS_RECIRC 4
+#define PKT_INSTANCE_TYPE_NORMAL 0
 #define MAX_IOT_AGG 3
 
 /*************************************************************************
@@ -19,19 +22,6 @@ typedef bit<32> ip4Addr_t;
 register<bit<32>>(1) pontador;
 register<bit<32>>(3) banco;
 register<bit<32>>(1) iterador;
-
-struct custom_metadata_t {
-    bit<8>    m_pproc_01;
-    bit<8>    m_pproc_02; 
-    bit<32>   total_rodadas;
-    bit<8>    next_function;
-    bit<8>    proximo_pproc;
-    bit<32>   rodadas;
-    bit<8>    pkt_agg;
-    bit<8>    pkt_agregador;
-    bit<8>    pkt_filtrado; 
-    bit<8>    finalizado; 
-}
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -66,9 +56,28 @@ header ipv4_t {
 }
 
 struct metadata {
-    custom_metadata_t               custom_metadata;
-    bit<32> pointer;
-    bit<32> iterador;
+    @field_list(RECIRC_FL_1)
+    bit<8>    m_pproc_01;
+    @field_list(RECIRC_FL_1)
+    bit<8>    m_pproc_02; 
+    @field_list(RECIRC_FL_1)
+    bit<32>   total_rodadas;
+    @field_list(RECIRC_FL_1)
+    bit<8>    proximo_pproc;
+    @field_list(RECIRC_FL_1)
+    bit<32>   rodadas;
+    @field_list(RECIRC_FL_1)
+    bit<8>    pkt_agg;
+    @field_list(RECIRC_FL_1)
+    bit<8>    pkt_agregador;
+    @field_list(RECIRC_FL_1)
+    bit<8>    pkt_filtrado; 
+    @field_list(RECIRC_FL_1)
+    bit<8>    pre_processado;
+    @field_list(RECIRC_FL_1)
+    bit<8>    banco_cheio;
+    bit<32>   pointer;
+    bit<32>   iterador;
 }
 
 struct headers {
@@ -102,7 +111,7 @@ parser MyParser(packet_in packet,
 
     state parse_iotprotocol {
         packet.extract(hdr.iotprotocol);
-        transition select (meta.custom_metadata.pkt_agregador) {
+        transition select (meta.pkt_agregador) {
             1: parse_iot_agregacao;
             default: parse_ipv4;
         }
@@ -182,12 +191,12 @@ control MyIngress(inout headers hdr,
     }
 
     /*Biblioteca + Tabela de módulos*/
-    action biblioteca(bit<8> m_pproc_01, bit<8> m_pproc_02, bit<32> ttl_rodadas, egressSpec_t port) {
-        meta.custom_metadata.m_pproc_01  =  m_pproc_01;
-        meta.custom_metadata.m_pproc_02  =  m_pproc_02;
-        meta.custom_metadata.total_rodadas = ttl_rodadas;
-        standard_metadata.egress_spec = port;
-     }
+    action biblioteca(bit<8> m_pproc_01, bit<8> m_pproc_02, bit<32> ttl_rodadas) {
+        clone(CloneType.I2E, (bit<32>)1);
+        meta.m_pproc_01  =  m_pproc_01;
+        meta.m_pproc_02  =  m_pproc_02;
+        meta.total_rodadas = ttl_rodadas;
+    }
 
     table mapeamento{
         key = {
@@ -197,7 +206,7 @@ control MyIngress(inout headers hdr,
             biblioteca;
         }
            size = 1024;
-     }
+    }
 
     table ipv4_lpm {
         key = {
@@ -215,7 +224,7 @@ control MyIngress(inout headers hdr,
     apply {
 
         /*Verifica se a rodada é a primeira, se for realiza match+action IPV4 & Mapeamento*/
-        if (meta.custom_metadata.rodadas == 0){
+        if (meta.rodadas == 0){
             if (hdr.ipv4.isValid()) {
                 ipv4_lpm.apply();
             }
@@ -224,31 +233,34 @@ control MyIngress(inout headers hdr,
             mapeamento.apply();
 
             /*Metadado de próximo módulo de pré-processamento recebe a primeira função ser executada*/
-            meta.custom_metadata.proximo_pproc = meta.custom_metadata.m_pproc_01;   
+            meta.proximo_pproc = meta.m_pproc_01;   
         }
 
         /*Senão se a rodada é a segunda, ajeita segunda função a ser executada*/
-        else if (meta.custom_metadata.rodadas == 1){
+        else if (meta.rodadas == 1){
             
             /*Metadado de próximo módulo de pré-processamento recebe a segunda função ser executada*/
-            meta.custom_metadata.proximo_pproc = meta.custom_metadata.m_pproc_02;   
+            meta.proximo_pproc = meta.m_pproc_02;   
         }
 
-        /*Senão se a rodada atingiu o total, adiciona metadado e marca como finalizado. Isso não basta, ter controle pra garantir que esse pacote seja o que foi 
-        totalmente pré-processado*/
-        else if (meta.custom_metadata.rodadas == meta.custom_metadata.total_rodadas){
-                    meta.custom_metadata.finalizado = 1;
+        /*Senão se a rodada atingiu o total, adiciona metadado e marca como pré-processado e marca metadado de próximo pproc como 0 para passar reto pelos 
+        pré-processamentos*/
+        else if (meta.rodadas == meta.total_rodadas){
+                    meta.proximo_pproc = 0;
+                    meta.pre_processado = 1;
+
         }            
 
         /*Código da Agregação*/
         /*Primeira verificação com comparação ao identificador de Agregação com a próxima função a ser executada (Agregação = 1), se for inicia módulo Agregação*/
-        if (meta.custom_metadata.proximo_pproc == 1) {
+        if (meta.proximo_pproc == 1) {
 
-            /*Pacote chega, é um pacote agregador? Ou seja, já foi anteriormente clonado e recirculado, e logo, o Banco está Cheio? Se sim escreve banco*/
-            if (meta.custom_metadata.pkt_agregador == 1) {
+            /*Pacote chega, é um pacote agregador? Ou seja, já foi anteriormente recirculado, e logo, o Banco está Cheio? Se sim escreve banco*/
+            if (meta.pkt_agregador == 1) {
             escreve_banco_em_iot_agg();
-            /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle / Blockchain) */
-            standard_metadata.egress_spec = 42;
+
+            /*Esse pacote marcará o metadado Banco cheio como vazio, pois é importante que enquanto ele for recirculado ele próprio não entre no último decisor e crie loop*/
+            meta.banco_cheio = 0;
 
                 /*Decisor para ordenar cabeçalhos. Se meta.iterador == 'valor da primeira iteração' next_hdr = 0; Senão next_hdr = 1*/
                 if (meta.iterador == 1) {
@@ -260,7 +272,7 @@ control MyIngress(inout headers hdr,
                 }
             }
 
-            /*Senão for um pacote agregador, ou seja, clonado e recirculado, o banco não está cheio ainda, continua copiando*/
+            /*Senão for um pacote agregador, ou seja, marcado e recirculado, o banco não está cheio ainda, continua copiando*/
             else {
 
                 /*Le pontador e incrementa*/
@@ -280,22 +292,26 @@ control MyIngress(inout headers hdr,
                 /*Sempre chama funçao de escrever payload no banco*/
                 escreve_banco();
 
-                /*Se o banco estiver cheio, este último pacote será marcado como agregação sendo clonado I2E para se tornar o pacote agregador (coletor)
-                 em sucessivas recirculações e o original continuará indo para Cloud*/
+                /*Se o banco estiver cheio, realizamos as marcações pkt de agregação e banco cheio*/
                 if (meta.pointer == 0){
-                    meta.custom_metadata.pkt_agg = 1;
-                        clone(CloneType.I2E, (bit<32>)1);
+                    meta.pkt_agg = 1;
+                    meta.banco_cheio = 1;
+                }
+
+                /*Senão será descartado, pois já cumpriu seu dever de ser escrito no registrador banco*/
+                else {
+                    standard_metadata.egress_spec = DROP_PORT;
                 }
             }
         }
 
         /*Código de Filtragem*/
         /*Segunda verificação com comparação ao identificador de Filtragem com a próxima função a ser executada (Filtragem = 2)*/
-        if (meta.custom_metadata.proximo_pproc == 2) {
+        if (meta.proximo_pproc == 2) {
 
             /*Verifica se ID de cabeçalho é igual 1 (Sensível), se for coloca metadado que marca filtragem*/
             if (hdr.iotprotocol.iot_id == 1) {
-                meta.custom_metadata.pkt_filtrado = 1;
+                meta.pkt_filtrado = 1;
             }
         }
     }
@@ -329,60 +345,58 @@ control MyEgress(inout headers hdr,
     apply {
 
         /*O pacote que chega pertence ao módulo 1 Agregação? Se sim executa lógica Agg*/
-        if (meta.custom_metadata.pkt_agg == 1){
+        if (meta.pkt_agg == 1){
 
             /*Se contador responsavel por dizer se pacote agregado esta cheio ainda nao for 3, ou seja, n estiver cheio e tambem e maior que 0, ou seja,
             ja foi recirculado ao menos 1 vez, entao recircula novamente ate encher*/
             if (meta.iterador < 3 && meta.iterador > 0) {
-                recirculate_preserving_field_list(0);
+                recirculate_preserving_field_list(RECIRC_FL_1);
             }
 
             /*Agora uma vez que esse contador é igual a 3, ou seja, cabeçalhos de agregaçao cheios, removo metadado que marca como pré-processado por 1 (Agregação)
              & Soma +1 no Round, e recircula para executar próximo pré-processamento*/
-            
-            /*TODO*/
-             /*Pensar nessa lógica no começo para evitar que atualize o próx programa quando se está coletando pkts de agg*/
             else {
-                if (meta.iterador == 3) {
-                    /*Pensar em remover isso ou colocar mais uma condição*/
-                    meta.custom_metadata.pkt_agg = 0;
-                    meta.custom_metadata.pkt_agregador = 0;
-                    meta.custom_metadata.rodadas = meta.custom_metadata.rodadas + 1;
-                    recirculate_preserving_field_list(0);
+                if (meta.iterador == 3) {   
+                    meta.pkt_agg = 0;
+                    meta.pkt_agregador = 0;
+                    meta.rodadas = meta.rodadas + 1;
+                    recirculate_preserving_field_list(RECIRC_FL_1);
                 }
             }
 
-            /*Se o pacote for clonado, significa que o banco esta cheio, logo, o contador que diz se o pacote agregado esta cheio sera zerado. O pacote
+            /*Se houver metadado de banco cheio, o contador que diz se o pacote agregado esta cheio sera zerado. O pacote
             será marcado como agregador para iniciar lógica agregação em vetores no Ingress e o pacote será recirculado pela primeira vez dentro da lógica de Agregação*/
-            if (standard_metadata.instance_type == 1) {
+            if (meta.banco_cheio == 1) {
                 meta.iterador = 0;
                 iterador.write(0, 0);
                 hdr.iot_agregacao[0].next_hdr = 0;
-                meta.custom_metadata.pkt_agregador = 1;
-                recirculate_preserving_field_list(0);
+                meta.pkt_agregador = 1;
+                recirculate_preserving_field_list(RECIRC_FL_1);
             }
         }
 
         /*O pacote que chega pertence ao módulo 2 Filtragem? Se sim executa lógica Filt*/
-        if (meta.custom_metadata.pkt_filtrado == 1){
+        if (meta.pkt_filtrado == 1){
             
             /*Lógica que aplica filtragem*/
             /*Se dispositivo ID 1,2,3 então descarta pacote*/
             /*outCtrl.outputPort=DROP_PORT; Comando para descartar pacote, usar quando é filtrado? Repensar*/
 
             /*Remove Metadado que marca como pré-processado por 2 (Filtragem) & Soma +1 no Round*/
-            meta.custom_metadata.pkt_filtrado = 0;
-            meta.custom_metadata.rodadas = meta.custom_metadata.rodadas + 1;
+            meta.pkt_filtrado = 0;
+            meta.rodadas = meta.rodadas + 1;
 
             /*Lógica PRIME, recircula quando terminar para próximo programa, mas a filtragem é sempre o último programa independente da ordem*/
-            recirculate_preserving_field_list(3);
+            recirculate_preserving_field_list(RECIRC_FL_1);
         }
 
-        /*O pacote que chega já foi finalizado? Se realiza verificações para posterior envio para a Blockchain*/
-        if (meta.custom_metadata.finalizado == 1){
+        /*O pacote que chega já foi pré-processado? Se sim realiza verificações para posterior envio para a Blockchain*/
+        if (meta.pre_processado == 1){
+                    
+            /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle / Blockchain) */
+            standard_metadata.egress_spec = 42;
+
         	ipv4_lpm_gambia.apply();
-            /*TODO, coletou inf pra ir pra BC?*/
-            /*if agregado && manda */
         }
     }
 }

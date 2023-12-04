@@ -29,8 +29,7 @@
       "action_params": {
         "m_pproc_01": 2,
         "m_pproc_02": 1,
-        "ttl_rodadas": 2,
-        "port": 42
+        "ttl_rodadas": 2
       }
     },
     {

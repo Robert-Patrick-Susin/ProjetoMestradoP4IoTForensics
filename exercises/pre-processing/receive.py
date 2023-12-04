@@ -36,7 +36,7 @@ def handle_pkt(pkt):
     # if iotprotocol in pkt:
     if iot_agregacao in pkt:
         pkt.show2()
-        count = count + 1
+        #count = count + 1
         # nopre_total_pkt = open("3-pre_agreg_filt_total_pkt.txt","a")
         # nopre_total_pkt.write(str(count))
         # nopre_total_pkt.write("\n")
@@ -44,17 +44,17 @@ def handle_pkt(pkt):
         # tamanho_total_pkt = open("3-pre_agreg_filt_tamanho_total_pkt.txt","a")
         # tamanho_total_pkt.write(str(tamanho_total))
         # tamanho_total_pkt.write("\n")
-        tempo_atual = time.time()
-        list_tempos.append(tempo_atual - ultimo_tempo)
-        ultimo_tempo = tempo_atual
-        if (count > 1):
-            median = (statistics.median(list_tempos[1:]))
+        #tempo_atual = time.time()
+        #list_tempos.append(tempo_atual - ultimo_tempo)
+        #ultimo_tempo = tempo_atual
+        #if (count > 1):
+        #    median = (statistics.median(list_tempos[1:]))
             # Abre o arquivo 4-pre_med_rec_pkt.txt e escreve a media 
             # da taxa de recebimento de count pacotes
-            pre_med_rec_pkt = open("metricas/4-pre_med_rec_pkt.txt","w")
-            pre_med_rec_pkt.write(str(median))
-            pre_med_rec_pkt.write("\n")
-            pre_med_rec_pkt.write(str(count))
+        #    pre_med_rec_pkt = open("metricas/4-pre_med_rec_pkt.txt","w")
+        #    pre_med_rec_pkt.write(str(median))
+        #    pre_med_rec_pkt.write("\n")
+        #    pre_med_rec_pkt.write(str(count))
         
 
   
