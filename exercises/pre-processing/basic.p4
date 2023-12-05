@@ -249,6 +249,9 @@ control MyIngress(inout headers hdr,
                     meta.proximo_pproc = 0;
                     meta.pre_processado = 1;
 
+        /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle / Blockchain) */
+            standard_metadata.egress_spec = 42;
+
         }            
 
         /*Código da Agregação*/
@@ -392,10 +395,6 @@ control MyEgress(inout headers hdr,
 
         /*O pacote que chega já foi pré-processado? Se sim realiza verificações para posterior envio para a Blockchain*/
         if (meta.pre_processado == 1){
-                    
-            /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle / Blockchain) */
-            standard_metadata.egress_spec = 42;
-
         	ipv4_lpm_gambia.apply();
         }
     }
