@@ -5,7 +5,6 @@
 const bit<16> TYPE_IOTPROTOCOL = 0x1212;
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<8> RECIRC_FL_1 = 3;
-const bit<9> DROP_PORT = 0xF;
 
 #define PKT_INSTANCE_TYPE_INGRESS_RECIRC 4
 #define PKT_INSTANCE_TYPE_NORMAL 0
@@ -303,7 +302,7 @@ control MyIngress(inout headers hdr,
 
                 /*Senão será descartado, pois já cumpriu seu dever de ser escrito no registrador banco*/
                 else {
-                    standard_metadata.egress_spec = DROP_PORT;
+                    action drop();
                 }
             }
         }
