@@ -8,7 +8,7 @@ const bit<8> RECIRC_FL_1 = 3;
 
 #define PKT_INSTANCE_TYPE_INGRESS_RECIRC 4
 #define PKT_INSTANCE_TYPE_NORMAL 0
-#define MAX_IOT_AGG 3
+#define MAX_IOT_AGG 4
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -19,7 +19,7 @@ typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 
 register<bit<32>>(1) pontador;
-register<bit<32>>(3) banco;
+register<bit<32>>(4) banco;
 register<bit<32>>(1) iterador;
 
 header ethernet_t {
@@ -75,8 +75,12 @@ struct metadata {
     bit<8>    pre_processado;
     @field_list(RECIRC_FL_1)
     bit<8>    banco_cheio;
+    @field_list(RECIRC_FL_1)
     bit<32>   pointer;
+    @field_list(RECIRC_FL_1)
     bit<32>   iterador;
+    @field_list(RECIRC_FL_1)
+    bit<8>    passou_rodada_0;
 }
 
 struct headers {
@@ -222,8 +226,9 @@ control MyIngress(inout headers hdr,
         
     apply {
 
-        /*Verifica se a rodada é a primeira, se for realiza match+action IPV4 & Mapeamento*/
-        if (meta.rodadas == 0){
+        /*Verifica se a rodada é a primeira, se for realiza match+action IPV4 & Mapeamento. Também verifica se o pacote já passou por aqui,
+        caso for recirculado ele dará false nessa verificação de metadado qual é preenchido no final dessse If*/
+        if (meta.rodadas == 0 && meta.passou_rodada_0 == 0){
             if (hdr.ipv4.isValid()) {
                 ipv4_lpm.apply();
             }
@@ -232,7 +237,10 @@ control MyIngress(inout headers hdr,
             mapeamento.apply();
 
             /*Metadado de próximo módulo de pré-processamento recebe a primeira função ser executada*/
-            meta.proximo_pproc = meta.m_pproc_01;   
+            meta.proximo_pproc = meta.m_pproc_01;
+
+            /*Metadado para marcar que a rodada 0 já foi executada e assim em recirculações ela dará false para rodada 0*/
+            meta.passou_rodada_0 = 1;
         }
 
         /*Senão se a rodada é a segunda, ajeita segunda função a ser executada*/
@@ -279,7 +287,7 @@ control MyIngress(inout headers hdr,
 
                 /*Le pontador e incrementa*/
                 pontador.read(meta.pointer, 0);
-                if (meta.pointer < 2){
+                if (meta.pointer < 3){
                         meta.pointer = meta.pointer + 1;
                 }
 
@@ -302,7 +310,7 @@ control MyIngress(inout headers hdr,
 
                 /*Senão será descartado, pois já cumpriu seu dever de ser escrito no registrador banco*/
                 else {
-                    action drop();
+                    drop();
                 }
             }
         }
@@ -349,18 +357,17 @@ control MyEgress(inout headers hdr,
         /*O pacote que chega pertence ao módulo 1 Agregação? Se sim executa lógica Agg*/
         if (meta.pkt_agg == 1){
 
-            /*Se contador responsavel por dizer se pacote agregado esta cheio ainda nao for 3, ou seja, n estiver cheio e tambem e maior que 0, ou seja,
+            /*Se contador responsavel por dizer se pacote agregado esta cheio ainda nao for X, ou seja, n estiver cheio e tambem e maior que 0, ou seja,
             ja foi recirculado ao menos 1 vez, entao recircula novamente ate encher*/
-            if (meta.iterador < 3 && meta.iterador > 0) {
+            if (meta.iterador < 4 && meta.iterador > 0) {
                 recirculate_preserving_field_list(RECIRC_FL_1);
             }
 
-            /*Agora uma vez que esse contador é igual a 3, ou seja, cabeçalhos de agregaçao cheios, removo metadado que marca como pré-processado por 1 (Agregação)
+            /*Agora uma vez que esse contador é igual a X, ou seja, cabeçalhos de agregaçao cheios, removo metadado que marca como pré-processado por 1 (Agregação)
              & Soma +1 no Round, e recircula para executar próximo pré-processamento*/
             else {
-                if (meta.iterador == 3) {   
+                if (meta.iterador == 4) {   
                     meta.pkt_agg = 0;
-                    meta.pkt_agregador = 0;
                     meta.rodadas = meta.rodadas + 1;
                     recirculate_preserving_field_list(RECIRC_FL_1);
                 }

@@ -1,0 +1,202 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 36116736
+    name: "MyIngress.mapeamento"
+    alias: "mapeamento"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.srcAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 18152558
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 37375156
+    name: "MyIngress.ipv4_lpm"
+    alias: "ipv4_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 28792405
+  }
+  action_refs {
+    id: 25652968
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41628885
+    name: "MyEgress.ipv4_lpm_gambia"
+    alias: "ipv4_lpm_gambia"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 17178992
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 25652968
+    name: "MyIngress.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 28792405
+    name: "MyIngress.ipv4_forward"
+    alias: "MyIngress.ipv4_forward"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 32085840
+    name: "MyIngress.escreve_banco"
+    alias: "escreve_banco"
+  }
+}
+actions {
+  preamble {
+    id: 25926786
+    name: "MyIngress.escreve_banco_em_iot_agg"
+    alias: "escreve_banco_em_iot_agg"
+  }
+}
+actions {
+  preamble {
+    id: 18152558
+    name: "MyIngress.biblioteca"
+    alias: "biblioteca"
+  }
+  params {
+    id: 1
+    name: "m_pproc_01"
+    bitwidth: 8
+  }
+  params {
+    id: 2
+    name: "m_pproc_02"
+    bitwidth: 8
+  }
+  params {
+    id: 3
+    name: "ttl_rodadas"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 17178992
+    name: "MyEgress.ipv4_forward"
+    alias: "MyEgress.ipv4_forward"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "port"
+    bitwidth: 9
+  }
+}
+registers {
+  preamble {
+    id: 378579570
+    name: "pontador"
+    alias: "pontador"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 1
+}
+registers {
+  preamble {
+    id: 380432503
+    name: "banco"
+    alias: "banco"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 4
+}
+registers {
+  preamble {
+    id: 369356126
+    name: "iterador"
+    alias: "iterador"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 1
+}
+type_info {
+}

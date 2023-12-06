@@ -27,8 +27,8 @@
       },
       "action_name": "MyIngress.biblioteca",
       "action_params": {
-        "m_pproc_01": 2,
-        "m_pproc_02": 1,
+        "m_pproc_01": 1,
+        "m_pproc_02": 2,
         "ttl_rodadas": 2
       }
     },
