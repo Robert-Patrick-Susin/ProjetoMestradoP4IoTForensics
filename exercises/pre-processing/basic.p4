@@ -255,10 +255,8 @@ control MyIngress(inout headers hdr,
         else if (meta.rodadas == meta.total_rodadas){
                     meta.proximo_pproc = 0;
                     meta.pre_processado = 1;
-
-        /* Gambiarra para forçar porta de saída para host 42 (Plano de Controle / Blockchain) */
-            standard_metadata.egress_spec = 42;
-
+                    /*Forçar porta de saída para host 42 (Plano de Controle / Blockchain)*/
+                    standard_metadata.egress_spec = 42;
         }            
 
         /*Código da Agregação*/
@@ -333,25 +331,7 @@ control MyIngress(inout headers hdr,
 
 control MyEgress(inout headers hdr,
                  inout metadata meta,
-                 inout standard_metadata_t standard_metadata) {
-                        
-        action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-            standard_metadata.egress_spec = port;
-            hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-            hdr.ethernet.dstAddr = dstAddr;
-            hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-        }
-
-        table ipv4_lpm_gambia {
-            key = {
-                hdr.ipv4.dstAddr: lpm;
-            }
-            actions = {
-                ipv4_forward;
-            }
-            size = 1024;
-        }
-
+                 inout standard_metadata_t standard_metadata) {                   
     apply {
 
         /*O pacote que chega pertence ao módulo 1 Agregação? Se sim executa lógica Agg*/
@@ -397,11 +377,6 @@ control MyEgress(inout headers hdr,
 
             /*Lógica PRIME, recircula quando terminar para próximo programa, mas a filtragem é sempre o último programa independente da ordem*/
             recirculate_preserving_field_list(RECIRC_FL_1);
-        }
-
-        /*O pacote que chega já foi pré-processado? Se sim realiza verificações para posterior envio para a Blockchain*/
-        if (meta.pre_processado == 1){
-        	ipv4_lpm_gambia.apply();
         }
     }
 }

@@ -471,17 +471,6 @@
         "dstAddr": "08:00:00:00:41:41",
         "port": 41
       }
-    },
-            {
-      "table": "MyEgress.ipv4_lpm_gambia",
-      "match": {
-        "hdr.ipv4.dstAddr": ["10.0.41.41", 32]
-      },
-      "action_name": "MyEgress.ipv4_forward",
-      "action_params": {
-        "dstAddr": "08:00:00:00:42:42",
-        "port": 42
-      }
     }
   ]
 }
