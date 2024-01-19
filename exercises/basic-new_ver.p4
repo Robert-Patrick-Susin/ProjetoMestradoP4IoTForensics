@@ -2,6 +2,7 @@
 #include <core.p4>
 #include <v1model.p4>
 
+const bit<16> TYPE_IOTPROTOCOL = 0x1212;
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<8> RECIRC_FL_1 = 3;
 
@@ -25,6 +26,12 @@ header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
     bit<16>   etherType;
+}
+
+header iotprotocol_t {
+    bit<16> iot_id;
+    bit<16> iot_leituras;
+    bit<16> next_hdr;
 }
 
 header iot_agregacao_t {
@@ -78,6 +85,7 @@ struct metadata {
 
 struct headers {
     ethernet_t                      ethernet;
+    iotprotocol_t                   iotprotocol;
     ipv4_t                          ipv4;
     iot_agregacao_t[MAX_IOT_AGG]    iot_agregacao;
 }
@@ -95,24 +103,18 @@ parser MyParser(packet_in packet,
         transition parse_ethernet;
     }
 
-    // state parse_ethernet {
-    //     packet.extract(hdr.ethernet);
-    //     transition select(hdr.ethernet.etherType) {
-    //         TYPE_IPV4: parse_iotprotocol;
-    //         default: accept;
-    //     }
-    // }
-
-    // state parse_iotprotocol {
-    //     transition select (meta.pkt_agregador) {
-    //         1: parse_iot_agregacao;
-    //         default: parse_ipv4;
-    //     }
-    // }
-
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(meta.pkt_agregador) {
+        transition select(hdr.ethernet.etherType) {
+            TYPE_IOTPROTOCOL: parse_iotprotocol;
+            TYPE_IPV4: parse_ipv4;
+            default: accept;
+        }
+    }
+
+    state parse_iotprotocol {
+        packet.extract(hdr.iotprotocol);
+        transition select (meta.pkt_agregador) {
             1: parse_iot_agregacao;
             default: parse_ipv4;
         }
@@ -159,12 +161,12 @@ control MyIngress(inout headers hdr,
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-        // hdr.iotprotocol.next_hdr = 0;
+        hdr.iotprotocol.next_hdr = 0;
     }
 
     /*Escreve payload iot_leituras dentro da posiçao pointer no registrador banco*/
     action escreve_banco() {
-        banco.write(meta.pointer, (bit<32>)hdr.ipv4.dstAddr);
+        banco.write(meta.pointer, (bit<32>)hdr.iotprotocol.iot_leituras);
     }
 
     /*
@@ -201,7 +203,7 @@ control MyIngress(inout headers hdr,
 
     table mapeamento{
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.srcAddr: lpm;
         }
         actions = {
             biblioteca;
@@ -226,7 +228,6 @@ control MyIngress(inout headers hdr,
         /*Verifica se a rodada é a primeira, se for realiza match+action IPV4 & Mapeamento. Também verifica se o pacote já passou por aqui,
         caso for recirculado ele dará false nessa verificação de metadado qual é preenchido no final dessse If*/
         if (meta.rodadas == 0 && meta.passou_rodada_0 == 0){
-            // Não verifico se é válido, pois é reprodução de pcap
             // if (hdr.ipv4.isValid()) {
                 ipv4_lpm.apply();
             //}
@@ -274,6 +275,7 @@ control MyIngress(inout headers hdr,
                 }
                 else {
                     hdr.iot_agregacao[0].next_hdr = 1;
+                    hdr.iotprotocol.next_hdr = 1;
                 }
             }
 
@@ -310,15 +312,15 @@ control MyIngress(inout headers hdr,
             }
         }
 
-        // /*Código de Filtragem*/
-        // /*Segunda verificação com comparação ao identificador de Filtragem com a próxima função a ser executada (Filtragem = 2)*/
-        // if (meta.proximo_pproc == 2) {
+        /*Código de Filtragem*/
+        /*Segunda verificação com comparação ao identificador de Filtragem com a próxima função a ser executada (Filtragem = 2)*/
+        if (meta.proximo_pproc == 2) {
 
-        //     /*Verifica se ID de cabeçalho é igual 1 (Sensível), se for coloca metadado que marca filtragem*/
-        //     if (hdr.iotprotocol.iot_id == 1) {
-        //         meta.pkt_filtrado = 1;
-        //     }
-        // }
+            /*Verifica se ID de cabeçalho é igual 1 (Sensível), se for coloca metadado que marca filtragem*/
+            if (hdr.iotprotocol.iot_id == 1) {
+                meta.pkt_filtrado = 1;
+            }
+        }
     }
 }
 
@@ -408,6 +410,7 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
+        packet.emit(hdr.iotprotocol);
         packet.emit(hdr.iot_agregacao);
         packet.emit(hdr.ipv4);
     }

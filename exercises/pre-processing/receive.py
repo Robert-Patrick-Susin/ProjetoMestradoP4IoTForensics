@@ -32,10 +32,11 @@ def handle_pkt(pkt):
     # global tamanho_total
     global tempo_atual
     global ultimo_tempo
+    pkt.show2()
     # IF iotprotocol usado para quando há somente filtragem
     # if iotprotocol in pkt:
-    if iot_agregacao in pkt:
-        pkt.show2()
+    #if iot_agregacao in pkt:
+    #    pkt.show2()
         #count = count + 1
         # nopre_total_pkt = open("3-pre_agreg_filt_total_pkt.txt","a")
         # nopre_total_pkt.write(str(count))

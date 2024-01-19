@@ -21,18 +21,6 @@
       }
     },
     {
-      "table": "MyIngress.mapeamento",
-      "match": {
-        "hdr.ipv4.srcAddr": ["10.0.1.1", 32]
-      },
-      "action_name": "MyIngress.biblioteca",
-      "action_params": {
-        "m_pproc_01": 1,
-        "m_pproc_02": 2,
-        "ttl_rodadas": 2
-      }
-    },
-    {
       "table": "MyIngress.ipv4_lpm",
       "match": {
         "hdr.ipv4.dstAddr": ["10.0.2.2", 32]
@@ -459,6 +447,18 @@
       "action_params": {
         "dstAddr": "08:00:00:00:40:40",
         "port": 40
+      }
+    },
+            {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.dstAddr": ["192.168.1.7", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 2,
+        "ttl_rodadas": 2
       }
     },
             {
