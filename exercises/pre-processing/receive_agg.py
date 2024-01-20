@@ -28,24 +28,14 @@ def get_if():
 
 # evento de recepção de pacote 
 def handle_pkt(pkt):
-    global count
+    # global count
     # global tamanho_total
-    global tempo_atual
-    global ultimo_tempo
-    pkt.show2()
-
-    #Teste para ver se está ok
-    # count = count + 1
-    # countbla = open("bla.txt","a")
-    # countbla.write(str(count))
-    # countbla.write("\n")
-    # if iot_agregacao in pkt:
-        #pkt.show2()
+    # global tempo_atual
+    # global ultimo_tempo
     
-
-
     # IF iotprotocol usado para quando há somente filtragem
-    # if iotprotocol in pkt:
+     if iot_agregacao in pkt:
+         pkt.show2()
     #if iot_agregacao in pkt:
     #    pkt.show2()
         #count = count + 1
@@ -70,7 +60,7 @@ def handle_pkt(pkt):
         
 
   
-    sys.stdout.flush()
+sys.stdout.flush()
 
         # Criar lista iot_agregado que sera enviado a BC, dar append nos campos
         # iot_agregado = []

@@ -44,7 +44,7 @@ pcap_file_path = '../../../Downloads/normal_MQTT_sensors_send_1min.pcap'
 packets = rdpcap(pcap_file_path)
 
 # Select a subset of packets to send (e.g., the first 5 packets)
-packets_to_send = packets[:8]
+packets_to_send = packets[:16]
 
 # Send selected packets
 sendp(packets_to_send)

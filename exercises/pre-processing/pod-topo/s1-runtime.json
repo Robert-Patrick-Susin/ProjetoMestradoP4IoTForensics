@@ -461,6 +461,17 @@
         "ttl_rodadas": 2
       }
     },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["192.168.1.7", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "dstAddr": "08:00:00:00:41:41",
+        "port": 41
+      }
+    },
             {
       "table": "MyIngress.ipv4_lpm",
       "match": {

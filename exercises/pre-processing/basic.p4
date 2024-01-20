@@ -19,7 +19,7 @@ typedef bit<32> ip4Addr_t;
 
 register<bit<32>>(1) pontador;
 register<bit<32>>(4) banco;
-register<bit<32>>(1) iterador;
+// register<bit<32>>(1) iterador;
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -65,8 +65,6 @@ struct metadata {
     @field_list(RECIRC_FL_1)
     bit<8>    pkt_filtrado; 
     @field_list(RECIRC_FL_1)
-    bit<8>    pre_processado;
-    @field_list(RECIRC_FL_1)
     bit<8>    banco_cheio;
     @field_list(RECIRC_FL_1)
     bit<32>   pointer;
@@ -94,21 +92,6 @@ parser MyParser(packet_in packet,
     state start {
         transition parse_ethernet;
     }
-
-    // state parse_ethernet {
-    //     packet.extract(hdr.ethernet);
-    //     transition select(hdr.ethernet.etherType) {
-    //         TYPE_IPV4: parse_iotprotocol;
-    //         default: accept;
-    //     }
-    // }
-
-    // state parse_iotprotocol {
-    //     transition select (meta.pkt_agregador) {
-    //         1: parse_iot_agregacao;
-    //         default: parse_ipv4;
-    //     }
-    // }
 
     state parse_ethernet {
         packet.extract(hdr.ethernet);
@@ -159,7 +142,6 @@ control MyIngress(inout headers hdr,
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-        // hdr.iotprotocol.next_hdr = 0;
     }
 
     /*Escreve payload iot_leituras dentro da posiçao pointer no registrador banco*/
@@ -171,12 +153,9 @@ control MyIngress(inout headers hdr,
     Isso ocorre pela funçao push_front que empurra todas posiçoes 1 casa a direita do vetor iot_agregacao{2}, e a nova posiçao apontada agora e 0, 
     a ultima ficara na 1, assim populando as posiçoes consecutivas do "mesmo" cabeçalho composto
     Essa nova posiçao e invalida, por isso e necessario setValid para seta-la como valida e sendo por hr undefined
-    Agora, e realizada leitura do payload iot_leituras armazenado no registrador banco na posicao meta.iterador para recebimento pelo
-    novo cabeçalho iot_agregacao na posicao reposicionada sendo 0, no vlr iot_leituras para o iot_agg.
+    Usado meta.iterador para recebimento pelo novo cabeçalho iot_agregacao na posicao reposicionada sendo 0, no vlr iot_leituras para o iot_agg.
     */
     action escreve_banco_em_iot_agg() {
-        /*Armazena na variavel meta.iterador o vlr do registrador iterador na posicao 0*/
-	 	iterador.read(meta.iterador, 0);
         hdr.iot_agregacao.push_front(1);
         hdr.iot_agregacao[0].setValid();
         /*Declara variavel local para armazenar o payload*/
@@ -187,8 +166,6 @@ control MyIngress(inout headers hdr,
         hdr.iot_agregacao[0].iot_agg = (bit<16>)armazena_payload;
         /*Soma 1 no iterador para pegar a proxima posicao na proxima iteraçao*/
         meta.iterador = meta.iterador + 1;
-        /*Escreve o novo vlr somado meta.iterador no registrador iterador na posiçao 0*/
-        iterador.write(0, meta.iterador);
     }
 
     /*Biblioteca + Tabela de módulos*/
@@ -226,10 +203,9 @@ control MyIngress(inout headers hdr,
         /*Verifica se a rodada é a primeira, se for realiza match+action IPV4 & Mapeamento. Também verifica se o pacote já passou por aqui,
         caso for recirculado ele dará false nessa verificação de metadado qual é preenchido no final dessse If*/
         if (meta.rodadas == 0 && meta.passou_rodada_0 == 0){
-            // Não verifico se é válido, pois é reprodução de pcap
-            // if (hdr.ipv4.isValid()) {
+            if (hdr.ipv4.isValid()) {
                 ipv4_lpm.apply();
-            //}
+            }
 
             /*Executa tabela de mapeamento e biblioteca para mapear a ordem de pré-processamento que o usuário inseriu*/ 
             mapeamento.apply();
@@ -248,11 +224,9 @@ control MyIngress(inout headers hdr,
             meta.proximo_pproc = meta.m_pproc_02;   
         }
 
-        /*Senão se a rodada atingiu o total, adiciona metadado e marca como pré-processado e marca metadado de próximo pproc como 0 para passar reto pelos 
-        pré-processamentos*/
+        /*Senão se a rodada atingiu o total, adiciona metadado de próximo pproc como 0 para passar reto pelos pré-processamentos*/
         else if (meta.rodadas == meta.total_rodadas){
                     meta.proximo_pproc = 0;
-                    meta.pre_processado = 1;
                     /*Forçar porta de saída para host 42 (Plano de Controle / Blockchain)*/
                     standard_metadata.egress_spec = 42;
         }            
@@ -310,15 +284,12 @@ control MyIngress(inout headers hdr,
             }
         }
 
-        // /*Código de Filtragem*/
-        // /*Segunda verificação com comparação ao identificador de Filtragem com a próxima função a ser executada (Filtragem = 2)*/
-        // if (meta.proximo_pproc == 2) {
-
-        //     /*Verifica se ID de cabeçalho é igual 1 (Sensível), se for coloca metadado que marca filtragem*/
-        //     if (hdr.iotprotocol.iot_id == 1) {
-        //         meta.pkt_filtrado = 1;
-        //     }
-        // }
+        /*Código de Filtragem*/
+        /*Segunda verificação com comparação ao identificador de Filtragem com a próxima função a ser executada (Filtragem = 2)*/
+        if (meta.proximo_pproc == 2) {
+            /*Coloca metadado que marca filtragem*/
+            meta.pkt_filtrado = 1;
+        }
     }
 }
 
@@ -353,7 +324,6 @@ control MyEgress(inout headers hdr,
             será marcado como agregador para iniciar lógica agregação em vetores no Ingress e o pacote será recirculado pela primeira vez dentro da lógica de Agregação*/
             if (meta.banco_cheio == 1) {
                 meta.iterador = 0;
-                iterador.write(0, 0);
                 hdr.iot_agregacao[0].next_hdr = 0;
                 meta.pkt_agregador = 1;
                 recirculate_preserving_field_list(RECIRC_FL_1);
