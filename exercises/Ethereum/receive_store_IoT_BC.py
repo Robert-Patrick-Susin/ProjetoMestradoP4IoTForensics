@@ -146,8 +146,6 @@ def handle_pkt(pkt):
     iot_leituras = pkt[IP].dst
     
 # if iotprotocol usado para quando cabeçalho/agregação não é usado
-
-
                             
     # if iot_agregacao usado quando há cabeçalho/agregação
     # if iot_agregacao in pkt:
@@ -196,30 +194,8 @@ def handle_pkt(pkt):
         # pre_med_rec_pkt.write(str(median))
         # pre_med_rec_pkt.write("\n")
         # pre_med_rec_pkt.write(str(count))
-					
-
-			
+							
 sys.stdout.flush()
-
-# Criar lista iot_agregado que sera enviado a BC, dar append nos campos
-# iot_agregado = []
-# iot_agregado.append(pkt[iotprotocol].iot_id)
-# iot_agregado.append(pkt[iot_agregacao][0].iot_agg)
-# iot_agregado.append(pkt[iot_agregacao][1].iot_agg)
-# iot_agregado.append(pkt[iot_agregacao][2].iot_agg)
-
-# Gerar arquivo txt quando nr de pacotes atingir o nr do teste - 100:
-
-            
-
-# Conectar com Ethereum e mandar como transaçoes
-# # def sendtoblockchain(iot_agregado):
-
-# # Criar script python com web3
-
-# # txn_hash = counter.functions.envia_pkt_agregado(pkt[iot_agregacao][0],pkt[iot_agregacao][1],pkt[iot_agregacao][2]).transact({"from": me})
-# # contrato.funcoes.envia_pkt_agregado(31, 20, 30, 40)
-
 def main():
     # ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth' in i]
     iface = 's1-eth42'

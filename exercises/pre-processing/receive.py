@@ -32,18 +32,15 @@ def handle_pkt(pkt):
     # global tamanho_total
     global tempo_atual
     global ultimo_tempo
-    pkt.show2()
-
-    #Teste para ver se está ok
-    # count = count + 1
-    # countbla = open("bla.txt","a")
-    # countbla.write(str(count))
-    # countbla.write("\n")
-    # if iot_agregacao in pkt:
-        #pkt.show2()
     
-
-
+    #Teste para ver se está ok
+    if iot_agregacao in pkt:
+        pkt.show2()
+        count = count + 1
+        countbla = open("teste.txt","a")
+        countbla.write(str(count))
+        countbla.write("\n")
+    
     # IF iotprotocol usado para quando há somente filtragem
     # if iotprotocol in pkt:
     #if iot_agregacao in pkt:
@@ -68,29 +65,7 @@ def handle_pkt(pkt):
         #    pre_med_rec_pkt.write("\n")
         #    pre_med_rec_pkt.write(str(count))
         
-
-  
-    sys.stdout.flush()
-
-        # Criar lista iot_agregado que sera enviado a BC, dar append nos campos
-        # iot_agregado = []
-        # iot_agregado.append(pkt[iotprotocol].iot_id)
-        # iot_agregado.append(pkt[iot_agregacao][0].iot_agg)
-        # iot_agregado.append(pkt[iot_agregacao][1].iot_agg)
-        # iot_agregado.append(pkt[iot_agregacao][2].iot_agg)
-
-        # Gerar arquivo txt quando nr de pacotes atingir o nr do teste - 100:
-
-            
-
-# Conectar com Ethereum e mandar como transaçoes
-# # def sendtoblockchain(iot_agregado):
-
-# # Criar script python com web3
-
-# # txn_hash = counter.functions.envia_pkt_agregado(pkt[iot_agregacao][0],pkt[iot_agregacao][1],pkt[iot_agregacao][2]).transact({"from": me})
-# # contrato.funcoes.envia_pkt_agregado(31, 20, 30, 40)
-
+sys.stdout.flush()
 def main():
     ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth' in i]
     iface = ifaces[0]

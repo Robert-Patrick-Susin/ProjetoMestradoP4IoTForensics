@@ -22,29 +22,13 @@
 #     p_out.append(new_pkt)
 # sendp(PacketList(p_out), iface="eth0")
 
-# Envia os pacotes na ordem original que foram criados
-#!/usr/bin/python
-# from scapy.all import *
-# import time, sys
-# pkts = rdpcap("../../../Downloads/normal_MQTT_sensors_send_1min.pcap")
-# clk = pkts[0].time
-# for p in pkts:
-#     time.sleep(p.time - clk)
-#     clk = p.time
-#     sendp(p)
-
-
-# Envia uma quantidade X de pacotes para testar agregação/filtragem
-from scapy.all import rdpcap, sendp
-
-# Replace 'your_file.pcap' with the actual PCAP file path
-pcap_file_path = '../../../Downloads/normal_MQTT_sensors_send_1min.pcap'
-
-# Read packets from the PCAP file
-packets = rdpcap(pcap_file_path)
-
-# Select a subset of packets to send (e.g., the first 5 packets)
-packets_to_send = packets[:16]
-
-# Send selected packets
-sendp(packets_to_send)
+# Envia os pacotes na ordem original que foram criados e envia a quantia que eu quero
+from scapy.all import *
+import time, sys
+packets = rdpcap("../../../Downloads/normal_MQTT_sensors_send_1min.pcap")
+packets_to_send = packets[:200]
+clk = packets_to_send[0].time
+for p in packets_to_send:
+    time.sleep(p.time - clk)
+    clk = p.time
+    sendp(p)

@@ -19,7 +19,6 @@ typedef bit<32> ip4Addr_t;
 
 register<bit<32>>(1) pontador;
 register<bit<32>>(4) banco;
-// register<bit<32>>(1) iterador;
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -72,6 +71,8 @@ struct metadata {
     bit<32>   iterador;
     @field_list(RECIRC_FL_1)
     bit<8>    passou_rodada_0;
+    @field_list(RECIRC_FL_1)
+    bit<8>    pkt_agregado;
 }
 
 struct headers {
@@ -95,7 +96,7 @@ parser MyParser(packet_in packet,
 
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(meta.pkt_agregador) {
+        transition select(meta.pkt_agregado) {
             1: parse_iot_agregacao;
             default: parse_ipv4;
         }
@@ -106,7 +107,6 @@ parser MyParser(packet_in packet,
         transition select(hdr.iot_agregacao.last.next_hdr) {
 			0: parse_ipv4;
             1: parse_iot_agregacao;
-			default: accept;
 		}
     }
 
@@ -242,11 +242,15 @@ control MyIngress(inout headers hdr,
             /*Esse pacote marcará o metadado Banco cheio como vazio, pois é importante que enquanto ele for recirculado ele próprio não entre no último decisor e crie loop*/
             meta.banco_cheio = 0;
 
-                /*Decisor para ordenar cabeçalhos. Se meta.iterador == 'valor da primeira iteração' next_hdr = 0; Senão next_hdr = 1*/
+                /*Decisor para ordenar cabeçalhos*/
                 if (meta.iterador == 1) {
+                    /*Metadado sinaliza que é um pacote agregado para ser parseado nas suas próximas recirculações e iterações*/
+                    meta.pkt_agregado = 1;
+                    /*Sinalizamos que nessa primeira iteração como o cabeçalho é [0], o próx hdr é IPv4*/
                     hdr.iot_agregacao[0].next_hdr = 0;
                 }
                 else {
+                    /*Demais iterações [1]...[n] o próx hdr é agregação*/
                     hdr.iot_agregacao[0].next_hdr = 1;
                 }
             }
@@ -324,7 +328,6 @@ control MyEgress(inout headers hdr,
             será marcado como agregador para iniciar lógica agregação em vetores no Ingress e o pacote será recirculado pela primeira vez dentro da lógica de Agregação*/
             if (meta.banco_cheio == 1) {
                 meta.iterador = 0;
-                hdr.iot_agregacao[0].next_hdr = 0;
                 meta.pkt_agregador = 1;
                 recirculate_preserving_field_list(RECIRC_FL_1);
             }
