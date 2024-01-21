@@ -4,6 +4,7 @@
 
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<8> RECIRC_FL_1 = 3;
+const bit<16> TYPE_AGG = 0x1212;
 
 #define PKT_INSTANCE_TYPE_INGRESS_RECIRC 4
 #define PKT_INSTANCE_TYPE_NORMAL 0
@@ -96,8 +97,8 @@ parser MyParser(packet_in packet,
 
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(meta.pkt_agregado) {
-            1: parse_iot_agregacao;
+        transition select(hdr.ethernet.etherType) {
+            TYPE_AGG: parse_iot_agregacao;
             default: parse_ipv4;
         }
     }
@@ -244,8 +245,8 @@ control MyIngress(inout headers hdr,
 
                 /*Decisor para ordenar cabeçalhos*/
                 if (meta.iterador == 1) {
-                    /*Metadado sinaliza que é um pacote agregado para ser parseado nas suas próximas recirculações e iterações*/
-                    meta.pkt_agregado = 1;
+                    /*Cabeçalho sinaliza que é um pacote agregado para ser parseado nas suas próximas recirculações e iterações*/
+                    hdr.ethernet.etherType = TYPE_AGG;
                     /*Sinalizamos que nessa primeira iteração como o cabeçalho é [0], o próx hdr é IPv4*/
                     hdr.iot_agregacao[0].next_hdr = 0;
                 }

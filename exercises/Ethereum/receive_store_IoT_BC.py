@@ -6,10 +6,10 @@ import time
 import statistics
 
 #Importa cabeçalho myIoT com ou cabeçalhos de pré-processamento
-from no_pre_myIoT_header import iotprotocol
+# from no_pre_myIoT_header import iotprotocol
 
 #Importa cabeçalho agregação
-#from myIoT_agg_header import iot_agregacao
+from myIoT_agg_header import iot_agregacao
 
 from scapy.all import *
 
@@ -141,16 +141,11 @@ def handle_pkt(pkt):
     # global tamanho_total
     # global tempo_atual
     # global ultimo_tempo
-                        
-# Store packet header in variable to send to BC
-    iot_leituras = pkt[IP].dst
-    
-# if iotprotocol usado para quando cabeçalho/agregação não é usado
-                            
-    # if iot_agregacao usado quando há cabeçalho/agregação
-    # if iot_agregacao in pkt:
-        # mostrar pacote
+                 
+    if iot_agregacao in pkt:
         # pkt.show2()
+        # Store packet header in variable to send to BC
+        iot_leituras = pkt[iot_agregacao].iot_agg
 
     ##Call functions and transactions##
 
@@ -171,7 +166,8 @@ def handle_pkt(pkt):
 
     # Wait for transaction receipt
     w3.eth.wait_for_transaction_receipt(send_store_contact)
-    # print(tx_receipt) # Optional
+    
+	# print(tx_receipt) # Optional
     print(contact_list.functions.retrieve().call())
 
 

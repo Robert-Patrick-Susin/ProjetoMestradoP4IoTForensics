@@ -18,6 +18,7 @@
 from scapy.all import *
 
 TYPE_IPV4 = 0x800
+TYPE_AGG = 0x1212
 
 class iot_agregacao(Packet):
     name = "iot_agregacao"
@@ -28,6 +29,6 @@ class iot_agregacao(Packet):
     def mysummary(self):
         return self.sprintf("iot_agg=%iot_agg%, next_hdr=%next_hdr%")
 
-bind_layers(Ether, iot_agregacao, type=TYPE_IPV4)
+bind_layers(Ether, iot_agregacao, type=TYPE_AGG)
 bind_layers(iot_agregacao, iot_agregacao, next_hdr=1)
 bind_layers(iot_agregacao, IP, next_hdr=0)
