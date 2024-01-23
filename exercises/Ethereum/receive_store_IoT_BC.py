@@ -1,30 +1,33 @@
 #!/usr/bin/env python3
 from web3 import Web3
-import os
-import sys
-import time
-import statistics
+# import os
+# import sys
+# import time
+# import statistics
 
 #Importa cabeçalho myIoT com ou cabeçalhos de pré-processamento
 # from no_pre_myIoT_header import iotprotocol
 
-#Importa cabeçalho agregação
-from myIoT_agg_header import iot_agregacao
+
 
 from scapy.all import *
 
+#Importa cabeçalho agregação
+from myIoT_agg_header import iot_agregacao
 
-ultimo_tempo = time.time()
+# ultimo_tempo = time.time()
 # Começo do experimento. Quando inicia o receptor
 count = 0
-tamanho_total = 0
-list_tempos = []
+countbloco = 0
+# tamanho_total = 0
+iot_leituras = 0
+# list_tempos = []
 
 ##For connecting to Ethereum ganache##
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
-chain_id = 1337
-caller = "0xCf75D3e8CE25E91719735E6f2Bcaa3dD1cB40572"
-private_key = "0x1efe0e09b0fe7dab2965f153d70fdaafbb533cfef0d2a7f0967977e77bd81ab6" # leaving the private key like this is very insecure if you are working on real world project
+chain_id = 5777
+caller = "0xA14d9917f039A2Bb14Ea12a3d9bf9F4b0f52a635"
+private_key = "0x50c868f4754e685c6ba038b998b5799ad7c2c02c62c107a1125ed5186cfc0962" # leaving the private key like this is very insecure if you are working on real world project
 ##Initialize smart contract and account##
 
 # Initialize contract ABI and address
@@ -116,7 +119,7 @@ abi = [
 				"type": "function"
 			}
 		]
-contract_address = "0xefd5cb39840CA56aDEFFb0754b6FE22203dfc06D"
+contract_address = "0x3166fa81BdE0Bac48d3b5b0d7B46f161094a7734"
 #Ethereum (Ganache) + Smart contract configuration done
 
 # Interaction with Smart Contract on Ethereum (Ganache)
@@ -137,16 +140,22 @@ def get_if():
 
 # evento de recepção de pacote 
 def handle_pkt(pkt):
-    # global count
+    global count
+    global countbloco
+    global iot_leituras
+    
     # global tamanho_total
     # global tempo_atual
     # global ultimo_tempo
                  
     if iot_agregacao in pkt:
         # pkt.show2()
-        # Store packet header in variable to send to BC
         iot_leituras = pkt[iot_agregacao].iot_agg
-
+        # Store packet header in variable to send to BC
+        count = count + 1
+        countpkt = open("1-total_pkt_recebido_agg.txt","w")
+        countpkt.write(str(count))
+        
     ##Call functions and transactions##
 
     #Get updated nonce (for everytime as its a loop)
@@ -168,7 +177,11 @@ def handle_pkt(pkt):
     w3.eth.wait_for_transaction_receipt(send_store_contact)
     
 	# print(tx_receipt) # Optional
-    print(contact_list.functions.retrieve().call())
+    # print(contact_list.functions.retrieve().call())
+    countbloco = countbloco + 1
+    countblc = open("1-total_blc_recebido_agg.txt","w")
+    countblc.write(str(count))
+    
 
 
     # count = count + 1
@@ -191,12 +204,12 @@ def handle_pkt(pkt):
         # pre_med_rec_pkt.write("\n")
         # pre_med_rec_pkt.write(str(count))
 							
-sys.stdout.flush()
+# sys.stdout.flush()
 def main():
     # ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth' in i]
     iface = 's1-eth42'
     print("sniffing on %s" % iface)
-    sys.stdout.flush()
+    # sys.stdout.flush()
     sniff(iface = iface,
           prn = lambda x: handle_pkt(x))
 

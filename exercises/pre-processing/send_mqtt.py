@@ -22,23 +22,26 @@
 #     p_out.append(new_pkt)
 # sendp(PacketList(p_out), iface="eth0")
 
-#Envia os pacotes na ordem original que foram criados e envia a quantia que eu quero
+# Envia os pacotes na ordem original que foram criados e envia a quantia que eu quero
 from scapy.all import *
 import time, sys
-packets = rdpcap("../../../Downloads/normal_MQTT_sensors_send_1min.pcap")
-packets_to_send = packets[:8000]
+packets = rdpcap("../../../Downloads/normal_MQTT_sensors_send.pcap")
+packets_to_send = packets[:7500]
+delay_between_packets = 1
+# Delay artificialmente introduzido para o endhost conseguir absorver os pacotes sem dropar
 clk = packets_to_send[0].time
 for p in packets_to_send:
     time.sleep(p.time - clk)
     clk = p.time
     sendp(p)
+    time.sleep(delay_between_packets)
 
-# # Envia os pacotes na ordem original que foram criados durante o tempo que eu quero
+# Envia os pacotes na ordem original que foram criados durante o tempo que eu quero
 # from scapy.all import *
 # import time, sys
 
 # # Set the duration in minutes
-# duration_minutes = 2
+# duration_minutes = 5
 
 # # Calculate the end time
 # end_time = time.time() + duration_minutes * 60
