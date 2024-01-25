@@ -179,7 +179,7 @@ control MyIngress(inout headers hdr,
 
     table mapeamento{
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.srcAddr: lpm;
         }
         actions = {
             biblioteca;
@@ -222,14 +222,16 @@ control MyIngress(inout headers hdr,
         else if (meta.rodadas == 1){
             
             /*Metadado de próximo módulo de pré-processamento recebe a segunda função ser executada*/
-            meta.proximo_pproc = meta.m_pproc_02;   
+            meta.proximo_pproc = meta.m_pproc_02;
+            /*Forçar porta de saída para host 42 (Plano de Controle / Blockchain)*/
+            standard_metadata.egress_spec = 42;
         }
 
-        /*Senão se a rodada atingiu o total, adiciona metadado de próximo pproc como 0 para passar reto pelos pré-processamentos*/
+        /*Se a rodada atingiu o total, adiciona metadado de próximo pproc como 0 para passar reto pelos pré-processamentos*/
         else if (meta.rodadas == meta.total_rodadas){
-                    meta.proximo_pproc = 0;
-                    /*Forçar porta de saída para host 42 (Plano de Controle / Blockchain)*/
-                    standard_metadata.egress_spec = 42;
+            meta.proximo_pproc = 0;
+            /*Forçar porta de saída para host 42 (Plano de Controle / Blockchain)*/
+            standard_metadata.egress_spec = 42;
         }            
 
         /*Código da Agregação*/
@@ -288,12 +290,13 @@ control MyIngress(inout headers hdr,
                 }
             }
         }
-
         /*Código de Filtragem*/
         /*Segunda verificação com comparação ao identificador de Filtragem com a próxima função a ser executada (Filtragem = 2)*/
         if (meta.proximo_pproc == 2) {
-            /*Coloca metadado que marca filtragem*/
-            meta.pkt_filtrado = 1;
+            /*Coloca metadado que marca filtragem para dar sequência em sua lógica*/
+            // meta.pkt_filtrado = 1;
+            /* Por hora filtragem só dropa pacote */
+            drop();
         }
     }
 }
@@ -337,9 +340,7 @@ control MyEgress(inout headers hdr,
         /*O pacote que chega pertence ao módulo 2 Filtragem? Se sim executa lógica Filt*/
         if (meta.pkt_filtrado == 1){
             
-            /*Lógica que aplica filtragem*/
-            /*Se dispositivo ID 1,2,3 então descarta pacote*/
-            /*outCtrl.outputPort=DROP_PORT; Comando para descartar pacote, usar quando é filtrado? Repensar*/
+            /*Lógica que aplica filtragem, por hora ela somente descarta no Ingress, mas lá e aqui poderia realizar outras coisas*/
 
             /*Remove Metadado que marca como pré-processado por 2 (Filtragem) & Soma +1 no Round*/
             meta.pkt_filtrado = 0;

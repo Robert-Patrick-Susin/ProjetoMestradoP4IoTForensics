@@ -449,18 +449,6 @@
         "port": 40
       }
     },
-            {
-      "table": "MyIngress.mapeamento",
-      "match": {
-        "hdr.ipv4.dstAddr": ["192.168.1.7", 32]
-      },
-      "action_name": "MyIngress.biblioteca",
-      "action_params": {
-        "m_pproc_01": 1,
-        "m_pproc_02": 2,
-        "ttl_rodadas": 2
-      }
-    },
     {
       "table": "MyIngress.ipv4_lpm",
       "match": {
@@ -470,6 +458,150 @@
       "action_params": {
         "dstAddr": "08:00:00:00:42:42",
         "port": 42
+      }
+    },
+            {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.5", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
+      }
+    },
+    {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.6", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
+      }
+    },
+    {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.7", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
+      }
+    },
+    {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.8", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
+      }
+    },
+    {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.10", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
+      }
+    },
+    {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.11", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
+      }
+    },
+    {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.12", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
+      }
+    },
+    {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.13", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
+      }
+    },
+    {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.14", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
+      }
+    },
+    {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.15", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
+      }
+    },
+    {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.16", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
+      }
+    },
+    {
+      "table": "MyIngress.mapeamento",
+      "match": {
+        "hdr.ipv4.srcAddr": ["10.0.0.17", 32]
+      },
+      "action_name": "MyIngress.biblioteca",
+      "action_params": {
+        "m_pproc_01": 1,
+        "m_pproc_02": 0,
+        "ttl_rodadas": 1
       }
     },
             {
