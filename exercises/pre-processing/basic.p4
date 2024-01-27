@@ -8,7 +8,7 @@ const bit<16> TYPE_AGG = 0x1212;
 
 #define PKT_INSTANCE_TYPE_INGRESS_RECIRC 4
 #define PKT_INSTANCE_TYPE_NORMAL 0
-#define MAX_IOT_AGG 4
+#define MAX_IOT_AGG 12
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -19,7 +19,7 @@ typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 
 register<bit<32>>(1) pontador;
-register<bit<32>>(4) banco;
+register<bit<32>>(12) banco;
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -223,7 +223,7 @@ control MyIngress(inout headers hdr,
             
             /*Metadado de próximo módulo de pré-processamento recebe a segunda função ser executada*/
             meta.proximo_pproc = meta.m_pproc_02;
-            /*Forçar porta de saída para host 42 (Plano de Controle / Blockchain)*/
+            /*Forçar porta de saída para host 42 (Plano de Controle / Blockchain) como medida de contingências para caso houver somente filtragem*/
             standard_metadata.egress_spec = 42;
         }
 
@@ -263,7 +263,7 @@ control MyIngress(inout headers hdr,
 
                 /*Le pontador e incrementa*/
                 pontador.read(meta.pointer, 0);
-                if (meta.pointer < 3){
+                if (meta.pointer < 11){
                         meta.pointer = meta.pointer + 1;
                 }
 
@@ -314,14 +314,14 @@ control MyEgress(inout headers hdr,
 
             /*Se contador responsavel por dizer se pacote agregado esta cheio ainda nao for X, ou seja, n estiver cheio e tambem e maior que 0, ou seja,
             ja foi recirculado ao menos 1 vez, entao recircula novamente ate encher*/
-            if (meta.iterador < 4 && meta.iterador > 0) {
+            if (meta.iterador < 12 && meta.iterador > 0) {
                 recirculate_preserving_field_list(RECIRC_FL_1);
             }
 
             /*Agora uma vez que esse contador é igual a X, ou seja, cabeçalhos de agregaçao cheios, removo metadado que marca como pré-processado por 1 (Agregação)
              & Soma +1 no Round, e recircula para executar próximo pré-processamento*/
             else {
-                if (meta.iterador == 4) {   
+                if (meta.iterador == 12) {   
                     meta.pkt_agg = 0;
                     meta.rodadas = meta.rodadas + 1;
                     recirculate_preserving_field_list(RECIRC_FL_1);

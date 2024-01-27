@@ -25,14 +25,13 @@ Y4 = []
 
 
 # 1 Linha - Baseline
-# X nr de pacotes
-with open('pacotes', 'r') as datafile:
+with open('1X_tempo_passado_seg', 'r') as datafile:
     plotting = csv.reader(datafile)
 
     for ROWS in plotting:
         X1.append(int(ROWS[0]))
 # Y nr total pkt        
-with open('1_blocos_rec', 'r') as datafile:
+with open('1Y_blocos_criados_baseline', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
@@ -40,15 +39,14 @@ with open('1_blocos_rec', 'r') as datafile:
 
 
 
-# 2 Linha - Agregação (4)
-# X nr de dispositivos        
-with open('pacotes', 'r') as datafile:
+# 2 Linha - Agregação (4)      
+with open('2X_tempo_passado_seg', 'r') as datafile:
     plotting = csv.reader(datafile)
 
     for ROWS in plotting:
         X2.append(int(ROWS[0]))
 # Y nr total pkt        
-with open('2_blocos_rec_4agg', 'r') as datafile:
+with open('2Y_blocos_criados_4agg', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
@@ -56,29 +54,27 @@ with open('2_blocos_rec_4agg', 'r') as datafile:
 
 
 
-# 3 Linha - Agregação (8)
-# X nr de dispositivos        
-with open('pacotes', 'r') as datafile:
+# 3 Linha - Agregação (8)     
+with open('3X_tempo_passado_seg', 'r') as datafile:
     plotting = csv.reader(datafile)
 
     for ROWS in plotting:
         X3.append(int(ROWS[0]))
 # Y nr total pkt 
-with open('3_blocos_rec_8agg', 'r') as datafile:
+with open('3Y_blocos_criados_8agg', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
         Y3.append(int(ROWS[0]))
 
-# 4 Linha - Agregação (12)
-# X nr de dispositivos        
-with open('pacotes', 'r') as datafile:
+# 4 Linha - Agregação (12)     
+with open('4X_tempo_passado_seg', 'r') as datafile:
     plotting = csv.reader(datafile)
 
     for ROWS in plotting:
         X4.append(int(ROWS[0]))
 # Y nr total pkt
-with open('4_blocos_rec_12agg', 'r') as datafile:
+with open('4Y_blocos_criados_12agg', 'r') as datafile:
     plotting = csv.reader(datafile)
     for ROWS in plotting:
         Y4.append(int(ROWS[0]))
@@ -128,12 +124,12 @@ with open('4_blocos_rec_12agg', 'r') as datafile:
         
 
 # Marcar linhas Baseline
-plt.plot(X1, Y1, 'o-', label='Baseline')
+plt.plot(X1, Y1, label='Baseline')
 
 # Marcar linhas com Agregação
-plt.plot(X2, Y2, 'o-', label='Agregação (4) (workload d)')
-plt.plot(X3, Y3, 'o-', label='Agregação (8) (workload f)')
-plt.plot(X4, Y4, 'o-', label='Agregação (12) (workload g)')
+plt.plot(X2, Y2, label='Agregação (4)')
+plt.plot(X3, Y3, label='Agregação (8)')
+plt.plot(X4, Y4, label='Agregação (12)')
 
 # Marcar linhas com Filtragem + Agregação
 # plt.plot(X5, Y5, 'o-', label='Agregação (4) + Filtragem (75% dispositivos) (workload h)')
@@ -143,6 +139,6 @@ plt.plot(X4, Y4, 'o-', label='Agregação (12) (workload g)')
 
 plt.legend()
 plt.grid(True)
-plt.xlabel('Número de pacotes IoT')
+plt.xlabel('Tempo passado (seg)')
 plt.ylabel('Total blocos criados na blockchain')
 plt.show()

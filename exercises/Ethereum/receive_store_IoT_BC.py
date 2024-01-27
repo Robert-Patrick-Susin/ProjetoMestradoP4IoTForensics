@@ -5,28 +5,24 @@ from web3 import Web3
 import time
 import statistics
 
-#Importa cabeçalho myIoT com ou cabeçalhos de pré-processamento
-# from no_pre_myIoT_header import iotprotocol
-
 from scapy.all import *
 
 #Importa cabeçalho agregação
 from myIoT_agg_header import iot_agregacao
 
 ultimo_tempo = time.time()
-# Começo do experimento. Quando inicia o receptor
 count = 0
 countbloco = 0
-# tamanho_total = 0
-iot_leituras = 0
 list_tempos = []
 tempo_passado_total = 0
+tempo_transacao = 0
+tempo_atual = 0
 
 ##For connecting to Ethereum ganache##
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
 chain_id = 5777
-caller = "0xd347e1Cf642c5C537736E3de21503e1247aDE24c"
-private_key = "0x8f2f2d03fba1b119b514ed76ba14a1211491538ec340b6c9dd51946c7545dabe" # leaving the private key like this is very insecure if you are working on real world project
+caller = "0x6547d934479F6dB68875ADc8eCd28cDFaF4048d5"
+private_key = "0xd69e807fa59dc504dbcac4e7c206ced69c8465eb8b4ddcc3c73e4a2441c56747" # leaving the private key like this is very insecure if you are working on real world project
 ##Initialize smart contract and account##
 
 # Initialize contract ABI and address
@@ -118,7 +114,7 @@ abi = [
 				"type": "function"
 			}
 		]
-contract_address = "0xcC87b8a795f97804bb89e59408942F407810B48F"
+contract_address = "0xFFf8D6bE5045884c23B9A51bf5d5b44A3048160A"
 #Ethereum (Ganache) + Smart contract configuration done
 
 # Interaction with Smart Contract on Ethereum (Ganache)
@@ -138,35 +134,46 @@ def get_if():
     return iface
 
 # evento de recepção de pacote 
-def handle_pkt(pkt):
+def handle_pkt(pkt): 
     global count
     global countbloco
     global iot_leituras
     global ultimo_tempo
     global tempo_atual
     global file
+    global file2
     global tempo_passado_desde_ultimo
     global tempo_passado_total
-
+    global tempo_transacao
+    global tempo_rec_pkt
+    global tempo_rec_transacao
     # global tamanho_total
     # global tempo_atual
     # global ultimo_tempo
-                 
+    
+    # Armazena varíavel qualquer para mandar baseline para BC
+    # iot_leituras = pkt[TCP].dport
+    #Detecta se pacote é MQTT para testar baseline
+    # if pkt[TCP].dport == 1883:
+    
+
+	# Detecta se cabeçalho de agregação está no pacote             
     if iot_agregacao in pkt:
-        # pkt.show2()
-        # Store packet header in variable to send to BC
+        # Armazena varíavel agregação para mandar para BC
         iot_leituras = pkt[iot_agregacao].iot_agg
-        count = count + 1
-        countpkt = open("1-total_pkt_recebido_agg.txt","w")
-        countpkt.write(str(count))
+        # pkt.show2()
+
+        #  count = count + 1
+        #  countpkt = open("1-total_pkt_recebido_agg.txt","w")
+        #  countpkt.write(str(count))
 		##Call functions and transactions##
 		#Get updated nonce (for everytime as its a loop)
         nonce = w3.eth.get_transaction_count(caller)
 
 		#Call function
         store_contact = contact_list.functions.addContact(
-			"name", str(iot_leituras), 
-		).build_transaction({"from": caller, "nonce": nonce})
+			"name", str(iot_leituras),
+ 		).build_transaction({"from": caller, "nonce": nonce})
 		# ({"from": caller, "gas": 200000, "gasPrice":200000, "nonce": nonce + 1})
 
 		# Sign transaction
@@ -174,11 +181,13 @@ def handle_pkt(pkt):
 
 		# Send transaction
         send_store_contact = w3.eth.send_raw_transaction(sign_store_contact.rawTransaction)
-		
+        tempo_rec_pkt = time.time()
 		# Wait for transaction receipt
         w3.eth.wait_for_transaction_receipt(send_store_contact)
-		# print(tx_receipt) # Optional
-		# print(contact_list.functions.retrieve().call())
+        # print(tx_receipt) # Optional
+        # print(contact_list.functions.retrieve().call())
+        # Tempo da transação
+        tempo_rec_transacao = time.time()
 		
 		#Escreve nr de blocos gerados
         countbloco = countbloco + 1
@@ -194,36 +203,13 @@ def handle_pkt(pkt):
         file = open("1_tempo_passado_seg", "a")
         file.write(str(tempo_passado_total))
         file.write('\n')
-
-		#Escreve med de tempo de transações criadas
-        # list_tempos.append(tempo_atual_recebe - ultimo_tempo)
-        # ultimo_tempo = tempo_atual_recebe
-        # median = (statistics.median(list_tempos))
-        # pre_med_cria_blc = open("2-pre_med_cria_blc.txt","w")
-        # pre_med_cria_blc.write(str(median))
-    
-
-
-    # count = count + 1
-    # nopre_total_pkt = open('metricas/4-teste.txt',"a")
-    # nopre_total_pkt.write(str(count))
-    # nopre_total_pkt.write("\n")
-    # tamanho_total = tamanho_total + sys.getsizeof(pkt)
-    # tamanho_total_pkt = open("3-pre_agreg_filt_tamanho_total_pkt.txt","a")
-    # tamanho_total_pkt.write(str(tamanho_total))
-    # tamanho_total_pkt.write("\n")
-    # tempo_atual = time.time()
-    # list_tempos.append(tempo_atual - ultimo_tempo)
-    # ultimo_tempo = tempo_atual
-    # if (count > 1):
-    #     median = (statistics.median(list_tempos[1:]))
-        # Abre o arquivo 4-pre_med_rec_pkt.txt e escreve a media 
-        # da taxa de recebimento de count pacotes
-        # pre_med_rec_pkt = open("metricas/4-pre_med_rec_pkt.txt","w")
-        # pre_med_rec_pkt.write(str(median))
-        # pre_med_rec_pkt.write("\n")
-        # pre_med_rec_pkt.write(str(count))
-							
+        
+		#Escreve quanto durou para efetuar cada transação
+        tempo_transacao = tempo_rec_transacao - tempo_rec_pkt
+        file2 = open("1_tempo_transacao_seg", "a")
+        file2.write(str(tempo_transacao))
+        file2.write('\n')
+         							
 # sys.stdout.flush()
 def main():
     # ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth' in i]
