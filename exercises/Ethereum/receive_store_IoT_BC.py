@@ -6,6 +6,7 @@ import time
 import statistics
 
 from scapy.all import *
+from scapy.all import TCP
 
 #Importa cabeçalho agregação
 from myIoT_agg_header import iot_agregacao
@@ -17,12 +18,13 @@ list_tempos = []
 tempo_passado_total = 0
 tempo_transacao = 0
 tempo_atual = 0
+tempo_transacao_total = 0
 
 ##For connecting to Ethereum ganache##
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
 chain_id = 5777
-caller = "0x6547d934479F6dB68875ADc8eCd28cDFaF4048d5"
-private_key = "0xd69e807fa59dc504dbcac4e7c206ced69c8465eb8b4ddcc3c73e4a2441c56747" # leaving the private key like this is very insecure if you are working on real world project
+caller = "0x468D49d369197aFED423c6b978Ddcd73a6096F22"
+private_key = "0xd493554d3bc1d5bfa07e2c123b23b3c85d99b5877f7b48856b4c6226bd3e5afc" # leaving the private key like this is very insecure if you are working on real world project
 ##Initialize smart contract and account##
 
 # Initialize contract ABI and address
@@ -114,7 +116,7 @@ abi = [
 				"type": "function"
 			}
 		]
-contract_address = "0xFFf8D6bE5045884c23B9A51bf5d5b44A3048160A"
+contract_address = "0x159Aa7f58145d9360570dE4d07d2D3Fa395b5680"
 #Ethereum (Ganache) + Smart contract configuration done
 
 # Interaction with Smart Contract on Ethereum (Ganache)
@@ -140,34 +142,29 @@ def handle_pkt(pkt):
     global iot_leituras
     global ultimo_tempo
     global tempo_atual
-    global file
-    global file2
-    global tempo_passado_desde_ultimo
+    # global file
+    # global file2
+    global file3
+    # global tempo_passado_desde_ultimo
     global tempo_passado_total
     global tempo_transacao
+    global tempo_transacao_total
     global tempo_rec_pkt
     global tempo_rec_transacao
     # global tamanho_total
     # global tempo_atual
     # global ultimo_tempo
-    
-    # Armazena varíavel qualquer para mandar baseline para BC
-    # iot_leituras = pkt[TCP].dport
-    #Detecta se pacote é MQTT para testar baseline
-    # if pkt[TCP].dport == 1883:
-    
-
-	# Detecta se cabeçalho de agregação está no pacote             
-    if iot_agregacao in pkt:
-        # Armazena varíavel agregação para mandar para BC
-        iot_leituras = pkt[iot_agregacao].iot_agg
-        # pkt.show2()
-
+    # if iot_agregacao in pkt:
+    #     # Armazena varíavel agregação para mandar para BC
+    #     iot_leituras = pkt[iot_agregacao].iot_agg 
         #  count = count + 1
         #  countpkt = open("1-total_pkt_recebido_agg.txt","w")
         #  countpkt.write(str(count))
 		##Call functions and transactions##
 		#Get updated nonce (for everytime as its a loop)
+    if pkt[TCP].dport == 1883:
+        iot_leituras = pkt[TCP].dport
+        tempo_rec_pkt = time.time()
         nonce = w3.eth.get_transaction_count(caller)
 
 		#Call function
@@ -181,7 +178,7 @@ def handle_pkt(pkt):
 
 		# Send transaction
         send_store_contact = w3.eth.send_raw_transaction(sign_store_contact.rawTransaction)
-        tempo_rec_pkt = time.time()
+        
 		# Wait for transaction receipt
         w3.eth.wait_for_transaction_receipt(send_store_contact)
         # print(tx_receipt) # Optional
@@ -190,26 +187,34 @@ def handle_pkt(pkt):
         tempo_rec_transacao = time.time()
 		
 		#Escreve nr de blocos gerados
-        countbloco = countbloco + 1
-        countblc = open("1_blocos_rec_baseline","a")
-        countblc.write(str(countbloco))
-        countblc.write('\n')
+        # countbloco = countbloco + 1
+        # countblc = open("1_blocos_rec_baseline","a")
+        # countblc.write(str(countbloco))
+        # countblc.write('\n')
         
 		#Escreve tempo passado em segundos
-        tempo_atual = time.time()
-        tempo_passado_desde_ultimo = tempo_atual - ultimo_tempo
-        ultimo_tempo = tempo_atual
-        tempo_passado_total = tempo_passado_desde_ultimo + tempo_passado_total
-        file = open("1_tempo_passado_seg", "a")
-        file.write(str(tempo_passado_total))
-        file.write('\n')
+        # tempo_atual = time.time()
+        # tempo_passado_desde_ultimo = tempo_atual - ultimo_tempo
+        # ultimo_tempo = tempo_atual
+        # tempo_passado_total = tempo_passado_desde_ultimo + tempo_passado_total
+        # file = open("1_tempo_passado_seg", "a")
+        # file.write(str(tempo_passado_total))
+        # file.write('\n')
         
 		#Escreve quanto durou para efetuar cada transação
+        # tempo_transacao = tempo_rec_transacao - tempo_rec_pkt
+        # file2 = open("1_tempo_transacao_seg", "a")
+        # file2.write(str(tempo_transacao))
+        # file2.write('\n')
+        
+		# Escreve quanto durou para efetuar transação de todos os pacotes recebidos
         tempo_transacao = tempo_rec_transacao - tempo_rec_pkt
-        file2 = open("1_tempo_transacao_seg", "a")
-        file2.write(str(tempo_transacao))
-        file2.write('\n')
-         							
+        tempo_transacao_total = tempo_transacao_total + tempo_transacao
+        file3 = open("tempo_transacao_total_seg", "a")
+        file3.write(str(tempo_transacao_total))
+        file3.write('\n')
+    else:
+     1+1
 # sys.stdout.flush()
 def main():
     # ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth' in i]
@@ -221,3 +226,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+# pkt.show2()
