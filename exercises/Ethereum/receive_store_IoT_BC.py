@@ -23,8 +23,8 @@ tempo_transacao_total = 0
 ##For connecting to Ethereum ganache##
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
 chain_id = 5777
-caller = "0x468D49d369197aFED423c6b978Ddcd73a6096F22"
-private_key = "0xd493554d3bc1d5bfa07e2c123b23b3c85d99b5877f7b48856b4c6226bd3e5afc" # leaving the private key like this is very insecure if you are working on real world project
+caller = "0x6d08Aa416bEFC7253BE0DA3c03ebF6C2915C4066"
+private_key = "0xc367a4d59ec2c6448957e97354620947fad6247829b56a9c77f715b23867165c" # leaving the private key like this is very insecure if you are working on real world project
 ##Initialize smart contract and account##
 
 # Initialize contract ABI and address
@@ -116,7 +116,7 @@ abi = [
 				"type": "function"
 			}
 		]
-contract_address = "0x159Aa7f58145d9360570dE4d07d2D3Fa395b5680"
+contract_address = "0x945dCF0e7626f394879932EBA2AC7db217250B82"
 #Ethereum (Ganache) + Smart contract configuration done
 
 # Interaction with Smart Contract on Ethereum (Ganache)
@@ -154,16 +154,17 @@ def handle_pkt(pkt):
     # global tamanho_total
     # global tempo_atual
     # global ultimo_tempo
-    # if iot_agregacao in pkt:
-    #     # Armazena varíavel agregação para mandar para BC
-    #     iot_leituras = pkt[iot_agregacao].iot_agg 
+    
         #  count = count + 1
         #  countpkt = open("1-total_pkt_recebido_agg.txt","w")
         #  countpkt.write(str(count))
 		##Call functions and transactions##
 		#Get updated nonce (for everytime as its a loop)
-    if pkt[TCP].dport == 1883:
-        iot_leituras = pkt[TCP].dport
+    # if pkt[TCP].dport == 1883:
+    #     iot_leituras = pkt[TCP].dport
+    if iot_agregacao in pkt:
+        # Armazena varíavel agregação para mandar para BC
+        iot_leituras = pkt[iot_agregacao].iot_agg 
         tempo_rec_pkt = time.time()
         nonce = w3.eth.get_transaction_count(caller)
 
@@ -213,8 +214,7 @@ def handle_pkt(pkt):
         file3 = open("tempo_transacao_total_seg", "a")
         file3.write(str(tempo_transacao_total))
         file3.write('\n')
-    else:
-     1+1
+
 # sys.stdout.flush()
 def main():
     # ifaces = [i for i in os.listdir('/sys/class/net/') if 'eth' in i]

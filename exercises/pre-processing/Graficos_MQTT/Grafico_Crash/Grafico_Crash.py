@@ -139,6 +139,6 @@ plt.plot(X4, Y4, label='Agregação (12)')
 
 plt.legend()
 plt.grid(True)
-plt.xlabel('Tempo passado (seg)')
-plt.ylabel('Total blocos criados na blockchain')
+plt.xlabel('Tempo (seg)')
+plt.ylabel('Total de blocos criados na blockchain')
 plt.show()

@@ -58,7 +58,7 @@
 # Envia os pacotes na ordem original que foram criados sem delay e envia a quantia que eu quero
 from scapy.all import *
 import time, sys
-packets = rdpcap("../../../Downloads/normal_MQTT_sensors_send.pcap")
+packets = rdpcap("../../../Downloads/normal_MQTT_sensors_send_1min.pcap")
 packets_to_send = packets[:400]
 # Delay artificialmente introduzido para o endhost conseguir absorver os pacotes sem dropar
 clk = packets_to_send[0].time
