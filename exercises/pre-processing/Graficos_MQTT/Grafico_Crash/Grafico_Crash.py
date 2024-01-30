@@ -31,7 +31,7 @@ with open('1X_tempo_passado_seg', 'r') as datafile:
     for ROWS in plotting:
         X1.append(int(ROWS[0]))
 # Y nr total pkt        
-with open('1Y_blocos_criados_baseline', 'r') as datafile:
+with open('1Y_med_blocos_criados_baseline', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
@@ -46,7 +46,7 @@ with open('2X_tempo_passado_seg', 'r') as datafile:
     for ROWS in plotting:
         X2.append(int(ROWS[0]))
 # Y nr total pkt        
-with open('2Y_blocos_criados_4agg', 'r') as datafile:
+with open('2Y_med_blocos_criados_4agg', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
@@ -61,7 +61,7 @@ with open('3X_tempo_passado_seg', 'r') as datafile:
     for ROWS in plotting:
         X3.append(int(ROWS[0]))
 # Y nr total pkt 
-with open('3Y_blocos_criados_8agg', 'r') as datafile:
+with open('3Y_med_blocos_criados_8agg', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
@@ -74,7 +74,7 @@ with open('4X_tempo_passado_seg', 'r') as datafile:
     for ROWS in plotting:
         X4.append(int(ROWS[0]))
 # Y nr total pkt
-with open('4Y_blocos_criados_12agg', 'r') as datafile:
+with open('4Y_med_blocos_criados_12agg', 'r') as datafile:
     plotting = csv.reader(datafile)
     for ROWS in plotting:
         Y4.append(int(ROWS[0]))

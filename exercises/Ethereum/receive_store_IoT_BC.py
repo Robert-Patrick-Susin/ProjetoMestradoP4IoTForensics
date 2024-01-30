@@ -23,8 +23,8 @@ tempo_transacao_total = 0
 ##For connecting to Ethereum ganache##
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
 chain_id = 5777
-caller = "0x6d08Aa416bEFC7253BE0DA3c03ebF6C2915C4066"
-private_key = "0xc367a4d59ec2c6448957e97354620947fad6247829b56a9c77f715b23867165c" # leaving the private key like this is very insecure if you are working on real world project
+caller = "0x761DdD846d8ba90253afe766Eb2308e2C744Df8b"
+private_key = "0x06680ece7c4185511e7f5b3d82afa2cc85cd627cfd3477239f1f7eafcb0d0350" # leaving the private key like this is very insecure if you are working on real world project
 ##Initialize smart contract and account##
 
 # Initialize contract ABI and address
@@ -116,7 +116,7 @@ abi = [
 				"type": "function"
 			}
 		]
-contract_address = "0x945dCF0e7626f394879932EBA2AC7db217250B82"
+contract_address = "0xF9Dd429Ca88Eb0df1BB6aA6DE12b6605DF212156"
 #Ethereum (Ganache) + Smart contract configuration done
 
 # Interaction with Smart Contract on Ethereum (Ganache)
@@ -187,20 +187,20 @@ def handle_pkt(pkt):
         # Tempo da transação
         tempo_rec_transacao = time.time()
 		
-		#Escreve nr de blocos gerados
-        # countbloco = countbloco + 1
-        # countblc = open("1_blocos_rec_baseline","a")
-        # countblc.write(str(countbloco))
-        # countblc.write('\n')
+		# Escreve nr de blocos gerados
+        countbloco = countbloco + 1
+        countblc = open("10-3Y_med_blocos_criados_8agg","a")
+        countblc.write(str(countbloco))
+        countblc.write('\n')
         
-		#Escreve tempo passado em segundos
-        # tempo_atual = time.time()
-        # tempo_passado_desde_ultimo = tempo_atual - ultimo_tempo
-        # ultimo_tempo = tempo_atual
-        # tempo_passado_total = tempo_passado_desde_ultimo + tempo_passado_total
-        # file = open("1_tempo_passado_seg", "a")
-        # file.write(str(tempo_passado_total))
-        # file.write('\n')
+		# Escreve tempo passado em segundos
+        tempo_atual = time.time()
+        tempo_passado_desde_ultimo = tempo_atual - ultimo_tempo
+        ultimo_tempo = tempo_atual
+        tempo_passado_total = tempo_passado_desde_ultimo + tempo_passado_total
+        file = open("10-3X_med_tempo_passado_seg", "a")
+        file.write(str(tempo_passado_total))
+        file.write('\n')
         
 		#Escreve quanto durou para efetuar cada transação
         # tempo_transacao = tempo_rec_transacao - tempo_rec_pkt
@@ -209,11 +209,11 @@ def handle_pkt(pkt):
         # file2.write('\n')
         
 		# Escreve quanto durou para efetuar transação de todos os pacotes recebidos
-        tempo_transacao = tempo_rec_transacao - tempo_rec_pkt
-        tempo_transacao_total = tempo_transacao_total + tempo_transacao
-        file3 = open("tempo_transacao_total_seg", "a")
-        file3.write(str(tempo_transacao_total))
-        file3.write('\n')
+        # tempo_transacao = tempo_rec_transacao - tempo_rec_pkt
+        # tempo_transacao_total = tempo_transacao_total + tempo_transacao
+        # file3 = open("tempo_transacao_total_seg", "a")
+        # file3.write(str(tempo_transacao_total))
+        # file3.write('\n')
 
 # sys.stdout.flush()
 def main():
