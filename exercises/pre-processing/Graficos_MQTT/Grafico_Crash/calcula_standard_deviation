@@ -1,0 +1,10 @@
+import numpy as np
+
+# Example data (replace with your data)
+data = [181, 171, 160, 176, 313, 152, 176, 183, 167, 166]
+
+# Calculate the standard deviation
+standard_deviation = np.std(data)
+
+# Print the result
+print(f"Standard Deviation: {standard_deviation}")

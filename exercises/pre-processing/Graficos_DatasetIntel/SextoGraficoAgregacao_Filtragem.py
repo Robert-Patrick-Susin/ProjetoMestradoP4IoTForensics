@@ -2,6 +2,10 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
+# plt.rcParams['font.size'] = 22
+
+# # Set the figure size for a 4:3 aspect ratio
+# plt.figure(figsize=(4, 3))
 
 # Linhas de Baseline
 Xb = []
@@ -28,7 +32,7 @@ with open('dispositivos_iot.txt', 'r') as datafile:
     for ROWS in plotting:
         Xb.append(int(ROWS[0]))
 # Y nr total pkt        
-with open('1-nopre_total_pkt.txt', 'r') as datafile:
+with open('1-nopre_tamanho_total_pkt.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
@@ -44,7 +48,7 @@ with open('dispositivos_iot.txt', 'r') as datafile:
     for ROWS in plotting:
         X2b.append(int(ROWS[0]))
 # Y nr total pkt        
-with open('2-nopre_total_pkt.txt', 'r') as datafile:
+with open('2-nopre_tamanho_total_pkt.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
@@ -60,7 +64,7 @@ with open('dispositivos_iot.txt', 'r') as datafile:
     for ROWS in plotting:
         X3b.append(int(ROWS[0]))
 # Y nr total pkt 
-with open('3-nopre_total_pkt.txt', 'r') as datafile:
+with open('3-nopre_tamanho_total_pkt.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
@@ -74,7 +78,7 @@ with open('dispositivos_iot.txt', 'r') as datafile:
     for ROWS in plotting:
         Xa.append(int(ROWS[0]))
 # Y nr total pkt
-with open('../pre-processing/1-pre_agreg_filt_total_pkt.txt', 'r') as datafile:
+with open('1-pre_agreg_filt_tamanhobytes_total_pkt.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
     for ROWS in plotting:
         Ya.append(int(ROWS[0]))
@@ -87,7 +91,7 @@ with open('dispositivos_iot.txt', 'r') as datafile:
     for ROWS in plotting:
         X2a.append(int(ROWS[0]))
 # Y nr total pkt 
-with open('../pre-processing/2-pre_agreg_filt_total_pkt.txt', 'r') as datafile:
+with open('2-pre_agreg_filt_tamanhobytes_total_pkt.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
@@ -101,7 +105,7 @@ with open('dispositivos_iot.txt', 'r') as datafile:
     for ROWS in plotting:
         X3a.append(int(ROWS[0]))
 # Y nr total pkt 
-with open('../pre-processing/3-pre_agreg_filt_total_pkt.txt', 'r') as datafile:
+with open('3-pre_agreg_filt_tamanhobytes_total_pkt.txt', 'r') as datafile:
     plotting = csv.reader(datafile)
      
     for ROWS in plotting:
@@ -121,6 +125,9 @@ plt.plot(X3a, Y3a, 'o-', label='Agregação e Filtragem (workload c)')
 
 plt.legend()
 plt.grid(True)
-plt.xlabel('Número de dispositivos IoT')
-plt.ylabel('Total pkt receb. Plano de Controle (20 segundos)')
-plt.show()
+plt.xlabel('Número de dispositivos IoT', fontsize=11)
+plt.ylabel('Total bytes receb. Plano de Controle (20 segundos)',fontsize=11)
+
+plt.savefig('output.pdf', bbox_inches='tight')
+
+# plt.show()

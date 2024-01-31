@@ -23,8 +23,8 @@ tempo_transacao_total = 0
 ##For connecting to Ethereum ganache##
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
 chain_id = 5777
-caller = "0x761DdD846d8ba90253afe766Eb2308e2C744Df8b"
-private_key = "0x06680ece7c4185511e7f5b3d82afa2cc85cd627cfd3477239f1f7eafcb0d0350" # leaving the private key like this is very insecure if you are working on real world project
+caller = "0x8fFf3ab2eCBeE66B9F03c5225b1148909A2499eF"
+private_key = "0x5f03f5ce7d44ca89dac7573b1cb24bafd0957184e99de88bafd3c70134a2dcec" # leaving the private key like this is very insecure if you are working on real world project
 ##Initialize smart contract and account##
 
 # Initialize contract ABI and address
@@ -116,7 +116,7 @@ abi = [
 				"type": "function"
 			}
 		]
-contract_address = "0xF9Dd429Ca88Eb0df1BB6aA6DE12b6605DF212156"
+contract_address = "0x186bC69A74b335047A1b1f368803c1d6C67fDF29"
 #Ethereum (Ganache) + Smart contract configuration done
 
 # Interaction with Smart Contract on Ethereum (Ganache)
@@ -189,7 +189,7 @@ def handle_pkt(pkt):
 		
 		# Escreve nr de blocos gerados
         countbloco = countbloco + 1
-        countblc = open("10-3Y_med_blocos_criados_8agg","a")
+        countblc = open("10-4Y_med_blocos_criados_8agg","a")
         countblc.write(str(countbloco))
         countblc.write('\n')
         
@@ -198,7 +198,7 @@ def handle_pkt(pkt):
         tempo_passado_desde_ultimo = tempo_atual - ultimo_tempo
         ultimo_tempo = tempo_atual
         tempo_passado_total = tempo_passado_desde_ultimo + tempo_passado_total
-        file = open("10-3X_med_tempo_passado_seg", "a")
+        file = open("10-4X_med_tempo_passado_seg", "a")
         file.write(str(tempo_passado_total))
         file.write('\n')
         

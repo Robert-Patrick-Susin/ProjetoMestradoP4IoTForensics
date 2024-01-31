@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 from matplotlib.patches import Polygon
+plt.rcParams['font.size'] = 28
 
 # Linhas
 X1 = []
